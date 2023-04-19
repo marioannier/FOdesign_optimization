@@ -1,0 +1,29 @@
+begin <pdApplicationInfo(1.1)>
+  FIMMWAVE 7.3.0 // applicationname applicationversion
+  2437 // licensenumber
+  6.2 (64 bit) 16336.70 // windowsversion RAM_in_MB 
+  19/04/2023 17:23:47 // savedate(dd/mm/yyyy) savetime(hh:mm:ss)
+end
+begin <fimmwave_prj(1.1)> "Experiment_fibers"
+  1 // include state files on save
+  begin <fwguideNode(1.1)> "SMF-28"
+    1 // include state files on save (ignored unless this is a root project node)
+    begin <fwg_wguide(3.0)>
+      "" "25" 
+      0               
+      1 
+      begin <fwg_layers(1.2)>
+        //w        nr       alpha    cfseg   cornerp 
+        4.1 1.4494 0                     1      0 
+        58.2 1.442 0                     0      0 
+        METALWALL 0 
+      end
+    end
+    begin <molab_parms(1.3)>
+      1 0 0 100 // autoRun <unused> minTEfrac maxTEfrac
+      N(1e+50) N(-1e+50)  // evstart evend
+      10 0 60 60  // maxNmodes molabOpt nx ny
+      1.5984 0 RGFSVEC 0 0 V1 0 0 1 1  // lambda hCurv solverID Hsymmetries Vsymmetries solverParms
+    end
+  end
+end
