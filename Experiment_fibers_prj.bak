@@ -2,7 +2,7 @@ begin <pdApplicationInfo(1.1)>
   FIMMWAVE 7.3.0 // applicationname applicationversion
   2437 // licensenumber
   6.2 (64 bit) 16336.70 // windowsversion RAM_in_MB 
-  21/04/2023 16:38:27 // savedate(dd/mm/yyyy) savetime(hh:mm:ss)
+  21/04/2023 18:40:07 // savedate(dd/mm/yyyy) savetime(hh:mm:ss)
 end
 begin <fimmwave_prj(1.1)> "Experiment_fibers"
   1 // include state files on save
@@ -301,11 +301,11 @@ begin <fimmwave_prj(1.1)> "Experiment_fibers"
     n11 = "0.032" 0 ""
     n12 = "0.0315" 0 ""
     n13 = "0.032" 0 ""
-    n1 = "0.0315" 0 ""
-    a2 = "2.49" 0 ""
+    n1 = "0.09" 0 ""
+    a2 = "6" 0 ""
     a3 = "4.5" 0 ""
     n2 = "0.05" 0 ""
-    lambda = "1.53" 0 ""
+    lambda = "1.9" 0 ""
     Temp = "25" 0 ""
   end
   begin <fwguideNode(1.1)> "test"
