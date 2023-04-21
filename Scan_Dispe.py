@@ -9,7 +9,7 @@ from math import *
 ##f = pdApp()
 app = fimm.start_fimmwave('C:\\Program Files\\PhotonD\\Fimmwave\\bin64\\fimmwave.exe', 5101)
 app.openproject(
-    'D:\\OneDrive UPV\\OneDrive - UPV\\PhD-m\\2022-2023\\software_and_simulations\\Non_Unif\\FIMMWAVE\\scripting\\Experiment_fibers.prj',
+    'D:\\OneDrive UPV\\OneDrive - UPV\\PhD-m\\2022-2023\\software_and_simulations\\Non_Unif\\FIMMWAVE\\scripting\\FOdesign_optimization\\Experiment_fibers.prj',
     "")
 
 wg = app.getsubnode("subnodes[1].subnodes[1]")
