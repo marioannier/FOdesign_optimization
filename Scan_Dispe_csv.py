@@ -1,14 +1,11 @@
 from pdPythonLib import *
 import fimmwavelib as fimm
 
+f = open('D_C7.csv', 'w')
 fimmap = pdApp()
 fimmap.StartApp('C:\\Program Files\\PhotonD\\Fimmwave\\bin64\\fimmwave.exe', 5101)
 dir ='(D:\\OneDrive UPV\\OneDrive - UPV\\PhD-m\\2022-2023\\lines\\Nonuniformly Spaced Photonic Microwave\\Simulations_run\\FIMMWAVE_Python\\FOdesign_optimization\\Experiment_fibers.prj,"")';
 fimmap.Exec("app.openproject"+dir)
-
-# fimmap.ConnectToApp("localhost")
-
-#f = open('D_C7.csv', 'w')
 
 varParam1 = "app.subnodes[1].subnodes[5]" # module with variables
 param1name = "lambda"
@@ -27,12 +24,9 @@ for param1 in range(0, param1Steps + 1, 1):
     fimmap.Exec(dev + ".evlist.update()")
     fimmap.AddCmd(dev + ".evlist.list[1].modedata.update(1)")
     disp = fimmap.Exec(dev + ".evlist.list[1].modedata.dispersion()")
-    #f.write(str(param1Value) + " ," + str(disp) + "\n")
+    f.write(str(param1Value) + " ," + str(disp) + "\n")
 
 print("All done!")
-#f.close()
-
-#f = open('Disp-ng-neff_Scan_n1_a2.csv', 'w')
 
 varParam1 = "app.subnodes[1].subnodes[5]"
 param1name = "n1" # core dopant
@@ -64,12 +58,11 @@ for param1 in range(0, param1Steps + 1, 1):
         fimmap.AddCmd(dev + ".evlist.list[1].modedata.update(1)")
         GRidx = fimmap.Exec(dev + ".evlist.list[1].modedata.neffg")
         disp = fimmap.Exec(dev + ".evlist.list[1].modedata.dispersion")
-        # f.write(
-        #     str(param1Value) + " ," + str(param2Value) + " ," + str(disp) + " ," + str(GRidx) + "," + str(neff) + "\n")
+        f.write(str(param1Value) + " ," + str(param2Value) + " ," + str(disp) + " ," + str(GRidx) + "," + str(neff) + "\n")
 
 print("All done!")
 
-#f.close()
+f.close()
 del fimmap
 
 
