@@ -46,27 +46,27 @@ class FiberProfile:
         # plt.title('Graded index fiber')
         # plt.show()
 
-    def mode_data(self, fimmap, dev, beta, neff, a_eff, alpha, dispersion, isLeaky, neffg, mode='1'):
+    def mode_data(self, dev, beta, neff, a_eff, alpha, dispersion, isLeaky, neffg, mode='1'):
 
         data = {'beta': 0, 'neff': 0, 'a_eff': 0, 'alpha': 0, 'dispersion': 0, 'isLeaky': 0, 'neffg': 0}
 
-        fimmap.Exec(dev + ".evlist.update(1)")
+        self.fimmap.Exec(dev + ".evlist.update(1)")
         if beta == 1:
-            data['beta'] = fimmap.Exec(dev + ".evlist.list[" + mode + "].beta()")
+            data['beta'] = self.fimmap.Exec(dev + ".evlist.list[" + mode + "].beta()")
         if neff == 1:
-            data['neef'] = fimmap.Exec(dev + ".evlist.list[" + mode + "].neff()")
+            data['neef'] = self.fimmap.Exec(dev + ".evlist.list[" + mode + "].neff()")
 
-        fimmap.AddCmd(dev + ".evlist.list[" + mode + "].modedata.update(1)")
+        self.fimmap.AddCmd(dev + ".evlist.list[" + mode + "].modedata.update(1)")
         if a_eff == 1:
-            data['a_eff'] = fimmap.Exec(dev + ".evlist.list[" + mode + "].modedata.a_eff()")
+            data['a_eff'] = self.fimmap.Exec(dev + ".evlist.list[" + mode + "].modedata.a_eff()")
         if alpha == 1:
-            data['alpha'] = fimmap.Exec(dev + ".evlist.list[" + mode + "].modedata.alpha()")
+            data['alpha'] = self.fimmap.Exec(dev + ".evlist.list[" + mode + "].modedata.alpha()")
         if dispersion == 1:
-            data['dispersion'] = fimmap.Exec(dev + ".evlist.list[" + mode + "].modedata.dispersion()")
+            data['dispersion'] = self.fimmap.Exec(dev + ".evlist.list[" + mode + "].modedata.dispersion()")
         if isLeaky == 1:
-            data['isLeaky'] = fimmap.Exec(dev + ".evlist.list[" + mode + "].modedata.isLeaky()")
+            data['isLeaky'] = self.fimmap.Exec(dev + ".evlist.list[" + mode + "].modedata.isLeaky()")
         if neffg == 1:
-            data['neffg'] = fimmap.Exec(dev + ".evlist.list[" + mode + "].modedata.neffg()")
+            data['neffg'] = self.fimmap.Exec(dev + ".evlist.list[" + mode + "].modedata.neffg()")
 
         return data
 
@@ -123,7 +123,6 @@ class FiberProfile:
                 # CONFLICT ->  I change intentionally the order of n1 & n2 to obtain the correct result
                 dop_perct = self.graded_index_profile(a1, n2, n1, alpha, n_steps)
                 dop_perct = np.append(dop_perct, [SiO2_perct, F_SiO2_1, SiO2_perct])
-                print(dop_perct)
 
                 # modifying layer parameters (sizes) & setting dopant percentage
                 for numlayer in range(1, 5, 1):
@@ -156,6 +155,7 @@ class FiberProfile:
                         self.fimmap.Exec(dev + ".layers[" + str(numlayer) + "].mx=" + str(dop_perct[numlayer - 1]))
                     else:
                         self.fimmap.Exec(dev + '.layers[' + str(numlayer) + '].size=' + str(sizes[numlayer - n_steps]))
+                        self.fimmap.Exec(dev + '.layers[' + str(numlayer) + '].mx=' + str(dop_perct[numlayer]))
 
             case _:
                 raise EnvironmentError("type not specify or incorrect")
