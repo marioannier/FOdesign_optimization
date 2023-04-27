@@ -1,4 +1,0 @@
-4.000	 GeO2-SiO2(0.37373500)	1	0
-"a2"	SiO2("n2")	0	0
-"a3"	F-SiO2_1(0)	0	0
-"SingFibreCladRad"	SiO2("n2")	0	0
