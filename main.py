@@ -33,4 +33,9 @@ if Is_the_project_created == False:
 
 # FALTA CHEKEAR EL NUMERO DE CAPAS Y CONTRUIR EN DEPENDENCIA DE ELLAS use Exce()
 dev = "app.subnodes[1].subnodes[1]"
-fiber_profile.builder_profile(dev, 1.5, 1.4, 0, 0, 1, 2, 3, 4, "Step Index", 0)
+fiber_profile.builder_profile(dev, 1.5, 1.445, 0, 0, 1, 2, 3, 4, "Step Index", 0)
+dev = "app.subnodes[1].subnodes[2]"
+fiber_profile.builder_profile(dev, 1.46, 1.445, 0, 0, 4, 2, 3, 4, "Graded", 1)
+dev = "app.subnodes[1].subnodes[3]"
+fiber_profile.builder_profile(dev, 1.46, 1.445, 0, 0, 4, 2, 3, 4, "Graded", 2.2)
+
