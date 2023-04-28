@@ -77,28 +77,9 @@ if want_to_calculate_lambda:
     data = fiber_profile.scan_lambda(dev, lam_s, lam_e, steps)
     print(data)
 
-    #   param_Scan = {"beta": False, "neff": False, "a_eff": False, "alpha": False, "dispersion": True,
-    #               "isLeaky": False, "neffg": False}
-    #
-    # for j in param_Name:
-    #     print("Scanning " + j + " and extracting: " + ", ".join(param_Scan2))
-    #
-    #     for i in range(0, param_Steps, 1):
-    #         step = param_Start + (float(i) / param_Steps) * (param_End - param_Start)
-    #         print("Solving Modes at " + j + " = " + str(step))
-    #         fimmap.Exec(dev + ".evlist.svp.lambda=" + str(step))
-    #         data[i, :] = list(fiber_profile.mode_data(dev, param_Scan))
-    #         f.write(str(data[i, :]))  # problem to save the data
-    # print("All done!")
-
-# # Save the array a to a CSV file
-# np.savetxt('output.csv', a, delimiter=',')
-#
-# # Load the saved CSV file and print its contents to verify the save was successful
-# loaded_data = np.loadtxt('output.csv', delimiter=',')
-# print(loaded_data)
-# print(data)
-
+# Save the array a to a CSV file
+    for element in data:
+        f.write(','.join(element) + '\n')
 
 f.close()
 del fimmap
