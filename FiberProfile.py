@@ -217,7 +217,7 @@ class FiberProfile:
             param_Scan = {"beta": False, "neff": False, "a_eff": False, "alpha": False, "dispersion": True,
                           "isLeaky": False, "neffg": False}
 
-        data_scan = np.zeros((steps, 8))
+        data_scan = np.zeros((steps, 7+1))
         data_scan = data_scan.astype('str')
 
         print("Scanning lambda and extracting: " + ", ".join(param_Scan))
@@ -226,7 +226,7 @@ class FiberProfile:
             lx = lambda_s + (float(i) / steps) * (lambda_e - lambda_s)
             print("Solving Modes at " + str(lx))
             self.fimmap.Exec(dev + ".evlist.svp.lambda=" + str(lx))
-            data_scan[i + 1, :] = list(self.mode_data(dev, param_Scan))
+            data_scan[i, 1:] = list(self.mode_data(dev, param_Scan))
             data_scan[i, 0] = str(lx)
 
         return data_scan

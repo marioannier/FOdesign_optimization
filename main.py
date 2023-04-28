@@ -46,14 +46,16 @@ if not Are_the_FWG_modules_created:
     fimmap.Exec(dev + ".evlist.mlp.maxnmodes=10")
 
 # TESTING CHANGING FIBER PARAMETERS
-dev = "app.subnodes[1].subnodes[1]"
-fiber_profile.update_profile(dev, 0.05, 0.05, 0, 0.05, 5.325, 3.302, 4.633, 6, "Step Index", 0)
+do_we_need_to_updatad_FWG_modules = False
+if do_we_need_to_updatad_FWG_modules:
+    dev = "app.subnodes[1].subnodes[1]"
+    fiber_profile.update_profile(dev, 0.05, 0.05, 0, 0.05, 5.325, 3.302, 4.633, 6, "Step Index", 0)
 
-dev = "app.subnodes[1].subnodes[2]"
-fiber_profile.update_profile(dev, 0.05, 0.05, 0, 0.05, 5.325, 3.302, 4.633, 6, "Graded", 1)
+    dev = "app.subnodes[1].subnodes[2]"
+    fiber_profile.update_profile(dev, 0.05, 0.05, 0, 0.05, 5.325, 3.302, 4.633, 6, "Graded", 1)
 
-dev = "app.subnodes[1].subnodes[3]"
-fiber_profile.update_profile(dev, 0.05, 0.05, 0, 0.05, 5.325, 3.302, 4.633, 6, "Graded", 2.2)
+    dev = "app.subnodes[1].subnodes[3]"
+    fiber_profile.update_profile(dev, 0.05, 0.05, 0, 0.05, 5.325, 3.302, 4.633, 6, "Graded", 2.2)
 
 # variables I want to modify: a1, a2, a3, n1, n3
 # I want to calculate: mode_values: beta, neff, a_eff, alpha, dispersion, isLeaky, neffg
@@ -64,28 +66,30 @@ want_to_calculate_lambda = True
 if want_to_calculate_lambda:
     param_Name = ["lambda"]
     param_Scan2 = ["beta", "neff", "a_eff", "alpha", "dispersion", "isLeaky", "neffg"]  # quitar el 2
-    param_Start = 1.4
-    param_End = 1.7
-    param_Steps = 10
-    # scan_Setting = [param_Name, param_Scan2, param_Start, param_End, param_Steps]
-    data = np.zeros((param_Steps, 7))
-    data = data.astype('str')
-    # device under test
+    lam_s = 1.4
+    lam_e = 1.7
+    steps = 10
+
     dev = "app.subnodes[1].subnodes[1]"
+    data = np.zeros((steps, 7 + 1))
+    data.astype('str')
 
-    param_Scan = {"beta": False, "neff": False, "a_eff": False, "alpha": False, "dispersion": True,
-                  "isLeaky": False, "neffg": False}
+    data = fiber_profile.scan_lambda(dev, lam_s, lam_e, steps)
+    print(data)
 
-    for j in param_Name:
-        print("Scanning " + j + " and extracting: " + ", ".join(param_Scan2))
-
-        for i in range(0, param_Steps, 1):
-            step = param_Start + (float(i) / param_Steps) * (param_End - param_Start)
-            print("Solving Modes at " + j + " = " + str(step))
-            fimmap.Exec(dev + ".evlist.svp.lambda=" + str(step))
-            data[i, :] = list(fiber_profile.mode_data(dev, param_Scan))
-            f.write(str(data[i, :]))  # problem to save the data
-    print("All done!")
+    #   param_Scan = {"beta": False, "neff": False, "a_eff": False, "alpha": False, "dispersion": True,
+    #               "isLeaky": False, "neffg": False}
+    #
+    # for j in param_Name:
+    #     print("Scanning " + j + " and extracting: " + ", ".join(param_Scan2))
+    #
+    #     for i in range(0, param_Steps, 1):
+    #         step = param_Start + (float(i) / param_Steps) * (param_End - param_Start)
+    #         print("Solving Modes at " + j + " = " + str(step))
+    #         fimmap.Exec(dev + ".evlist.svp.lambda=" + str(step))
+    #         data[i, :] = list(fiber_profile.mode_data(dev, param_Scan))
+    #         f.write(str(data[i, :]))  # problem to save the data
+    # print("All done!")
 
 # # Save the array a to a CSV file
 # np.savetxt('output.csv', a, delimiter=',')
