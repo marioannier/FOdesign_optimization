@@ -38,12 +38,12 @@ if Are_the_FWG_modules_created == False:
     dev = "app.subnodes[1].subnodes[1]"
     fiber_profile.builder_profile(dev, 0.05, 0.05, 0, 0.05, 5.325, 3.302, 4.633, 6, "Step Index", 0)
     fimmap.Exec(dev + ".evlist.mlp.maxnmodes=10")
-    # dev = "app.subnodes[1].subnodes[2]"
-    # fiber_profile.builder_profile(dev, 1.46, SiO2_ref_index, 0, 0, 6, 2, 3, 4, "Graded", 1)
-    # fimmap.Exec(dev + ".evlist.mlp.maxnmodes=10")
-    # dev = "app.subnodes[1].subnodes[3]"
-    # fiber_profile.builder_profile(dev, 1.46, SiO2_ref_index, 0, 0, 6, 2, 3, 4, "Graded", 2.2)
-    # fimmap.Exec(dev + ".evlist.mlp.maxnmodes=10")
+    dev = "app.subnodes[1].subnodes[2]"
+    fiber_profile.builder_profile(dev, 0.05, 0.05, 0, 0.05, 5.325, 3.302, 4.633, 6, "Graded", 1)
+    fimmap.Exec(dev + ".evlist.mlp.maxnmodes=10")
+    dev = "app.subnodes[1].subnodes[3]"
+    fiber_profile.builder_profile(dev, 0.05, 0.05, 0, 0.05, 5.325, 3.302, 4.633, 6, "Graded", 2.2)
+    fimmap.Exec(dev + ".evlist.mlp.maxnmodes=10")
 
 # variables I want to modify: a1, a2, a3, n1, n3
 # I want to calculate: mode_values: beta, neff, a_eff, alpha, dispersion, isLeaky, neffg

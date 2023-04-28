@@ -45,6 +45,7 @@ class FiberProfile:
         # plt.ylabel('dop_perc_GeO2-SiO2')
         # plt.title('Graded index fiber')
         # plt.show()
+
     def graded_dopa_gene(self, alpha, dopa_max, steps):
         # dopa_max in number NOT percentage
 
@@ -55,7 +56,6 @@ class FiberProfile:
             y[j] = (m * (j ** alpha) + dopa_max)
 
         return y
-
 
     def add_project(self, name='fiber_test', dir='nodir'):
         self.fimmap.Exec('app.addsubnode(' + name + 'fimmwave_prj, "project_test")')
@@ -87,11 +87,10 @@ class FiberProfile:
         dop_perct = [n1_dop, n2_dop, n3_dop, n4_dop]
         sizes = [a1, a2, a3, a4]
         # dopant percent of SiO2
-        a1_material='GeO2-SiO2'
-        a2_material='SiO2'
-        a3_material='F-SiO2_1'
-        a4_material='SiO2'
-
+        a1_material = 'GeO2-SiO2'
+        a2_material = 'SiO2'
+        a3_material = 'F-SiO2_1'
+        a4_material = 'SiO2'
 
         match pro_type:
             case "Step Index":
@@ -99,10 +98,10 @@ class FiberProfile:
                 self.fimmap.Exec(dev + ".insertlayer(3)")
                 self.fimmap.Exec(dev + ".insertlayer(4)")
                 # setting materials
-                self.fimmap.Exec(dev + '.layers[1].setMAT('+a1_material+')')
-                self.fimmap.Exec(dev + '.layers[2].setMAT('+a2_material+')')
-                self.fimmap.Exec(dev + '.layers[3].setMAT('+a3_material+')')
-                self.fimmap.Exec(dev + '.layers[4].setMAT('+a4_material+')')
+                self.fimmap.Exec(dev + '.layers[1].setMAT(' + a1_material + ')')
+                self.fimmap.Exec(dev + '.layers[2].setMAT(' + a2_material + ')')
+                self.fimmap.Exec(dev + '.layers[3].setMAT(' + a3_material + ')')
+                self.fimmap.Exec(dev + '.layers[4].setMAT(' + a4_material + ')')
 
                 # modifying layer parameters (sizes) & setting dopant percentage
                 for numlayer in range(1, 5, 1):
@@ -117,21 +116,21 @@ class FiberProfile:
                 self.fimmap.Exec(dev + '.layers[1].setMAT(SiO2)')
                 self.fimmap.Exec(dev + '.layers[2].setMAT(F-SiO2_1)')
                 self.fimmap.Exec(dev + '.layers[3].setMAT(SiO2)')
-                dop_perct_grad = self.graded_dopa_gene(alpha,n1_dop, n_steps)
+                dop_perct_grad = self.graded_dopa_gene(alpha, n1_dop, n_steps)
 
                 # plotting to check
                 x = np.arange(0, a1, a1 / n_steps)
                 plt.plot(x, dop_perct_grad)
                 plt.show()
 
-                dop_perct = dop_perct.pop(0)
-                dop_perct=  np.append(dop_perct_grad, dop_perct)
+                dop_perct.pop(0)
+                dop_perct = np.append(dop_perct_grad, dop_perct)
 
                 # loop to modify every layer
                 for numlayer in range(1, n_steps + 3, 1):
                     if numlayer < n_steps:
                         self.fimmap.Exec(dev + ".insertlayer(" + str(numlayer) + ")")
-                        self.fimmap.Exec(dev + '.layers[' + str(numlayer) + '].size=' + str(sizes[0]/n_steps))
+                        self.fimmap.Exec(dev + '.layers[' + str(numlayer) + '].size=' + str(sizes[0] / n_steps))
                         self.fimmap.Exec(dev + ".layers[" + str(numlayer) + "].setMAT(GeO2-SiO2)")
                         self.fimmap.Exec(dev + ".layers[" + str(numlayer) + "].mx=" + str(dop_perct[numlayer - 1]))
                     else:
