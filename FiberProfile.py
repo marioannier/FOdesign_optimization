@@ -16,7 +16,7 @@ class FiberProfile:
     def __set__(self, fimmap=object):
         self.fimmap = fimmap
 
-    def graded_index_profile(self, a1, n1, n2, alpha, steps):
+    def graded_refindex_gene(self, a1, n1, n2, alpha, steps):
         self.a1 = a1
         self.n1 = n1
         self.n2 = n2
@@ -46,29 +46,16 @@ class FiberProfile:
         # plt.title('Graded index fiber')
         # plt.show()
 
-    def mode_data(self, fimmap, dev, beta, neff, a_eff, alpha, dispersion, isLeaky, neffg, mode='1'):
+    def graded_dopa_gene(self, alpha, dopa_max, steps):
+        # dopa_max in number NOT percentage
 
-        data = {'beta': 0, 'neff': 0, 'a_eff': 0, 'alpha': 0, 'dispersion': 0, 'isLeaky': 0, 'neffg': 0}
+        m = -dopa_max / (steps ** alpha)
+        y = np.zeros(steps)
 
-        fimmap.Exec(dev + ".evlist.update(1)")
-        if beta == 1:
-            data['beta'] = fimmap.Exec(dev + ".evlist.list[" + mode + "].beta()")
-        if neff == 1:
-            data['neef'] = fimmap.Exec(dev + ".evlist.list[" + mode + "].neff()")
+        for j in range(steps):
+            y[j] = (m * (j ** alpha) + dopa_max)
 
-        fimmap.AddCmd(dev + ".evlist.list[" + mode + "].modedata.update(1)")
-        if a_eff == 1:
-            data['a_eff'] = fimmap.Exec(dev + ".evlist.list[" + mode + "].modedata.a_eff()")
-        if alpha == 1:
-            data['alpha'] = fimmap.Exec(dev + ".evlist.list[" + mode + "].modedata.alpha()")
-        if dispersion == 1:
-            data['dispersion'] = fimmap.Exec(dev + ".evlist.list[" + mode + "].modedata.dispersion()")
-        if isLeaky == 1:
-            data['isLeaky'] = fimmap.Exec(dev + ".evlist.list[" + mode + "].modedata.isLeaky()")
-        if neffg == 1:
-            data['neffg'] = fimmap.Exec(dev + ".evlist.list[" + mode + "].modedata.neffg()")
-
-        return data
+        return y
 
     def add_project(self, name='fiber_test', dir='nodir'):
         self.fimmap.Exec('app.addsubnode(' + name + 'fimmwave_prj, "project_test")')
@@ -96,34 +83,25 @@ class FiberProfile:
             case _:
                 raise EnvironmentError("type not specify or incorrect")
 
-    def builder_profile(self, dev, n1, n2, n3, n4, a1, a2, a3, a4, pro_type, alpha):
-        refrac_index = [n1, n2, n3, n4]
+    def builder_profile(self, dev, a1, a2, a3, a4, n1_dop, n2_dop, n3_dop, n4_dop, pro_type, alpha):
+        dop_perct = [n1_dop, n2_dop, n3_dop, n4_dop]
         sizes = [a1, a2, a3, a4]
         # dopant percent of SiO2
-        SiO2_perct = 0.05
-        F_SiO2_1 = 0
+        a1_material = 'GeO2-SiO2'
+        a2_material = 'SiO2'
+        a3_material = 'F-SiO2_1'
+        a4_material = 'SiO2'
 
         match pro_type:
             case "Step Index":
-                n_steps = 1
                 # creating layers
                 self.fimmap.Exec(dev + ".insertlayer(3)")
                 self.fimmap.Exec(dev + ".insertlayer(4)")
-                # create a variable
-                # self.fimmap.Exec('app.subnodes[1].addsubnode(pdVariablesNode,"Variables 1")')
-                # self.fimmap.Exec('app.subnodes[1].subnodes[4].addvariable(n2)')
-                # self.fimmap.Exec('app.subnodes[1].subnodes[4].setvariable(n2,"0.05")')
                 # setting materials
-                self.fimmap.Exec(dev + '.layers[1].setMAT(GeO2-SiO2)')
-                self.fimmap.Exec(dev + '.layers[2].setMAT(SiO2)')
-                self.fimmap.Exec(dev + '.layers[3].setMAT(F-SiO2_1)')
-                self.fimmap.Exec(dev + '.layers[4].setMAT(SiO2)')
-
-                # until the moment n2=n4 -> no se como obtener el indice de refraccion a partir de la data base
-                # CONFLICT ->  I change intentionally the order of n1 & n2 to obtain the correct result
-                dop_perct = self.graded_index_profile(a1, n2, n1, alpha, n_steps)
-                dop_perct = np.append(dop_perct, [SiO2_perct, F_SiO2_1, SiO2_perct])
-                print(dop_perct)
+                self.fimmap.Exec(dev + '.layers[1].setMAT(' + a1_material + ')')
+                self.fimmap.Exec(dev + '.layers[2].setMAT(' + a2_material + ')')
+                self.fimmap.Exec(dev + '.layers[3].setMAT(' + a3_material + ')')
+                self.fimmap.Exec(dev + '.layers[4].setMAT(' + a4_material + ')')
 
                 # modifying layer parameters (sizes) & setting dopant percentage
                 for numlayer in range(1, 5, 1):
@@ -138,24 +116,117 @@ class FiberProfile:
                 self.fimmap.Exec(dev + '.layers[1].setMAT(SiO2)')
                 self.fimmap.Exec(dev + '.layers[2].setMAT(F-SiO2_1)')
                 self.fimmap.Exec(dev + '.layers[3].setMAT(SiO2)')
-                dop_perct = self.graded_index_profile(a1, n1, n2, alpha, n_steps)
+                dop_perct_grad = self.graded_dopa_gene(alpha, n1_dop, n_steps)
 
                 # plotting to check
-                x = np.arange(0, self.a1, self.a1 / self.steps)
-                plt.plot(x, dop_perct)
+                x = np.arange(0, a1, a1 / n_steps)
+                plt.plot(x, dop_perct_grad)
                 plt.show()
 
-                dop_perct = np.append(dop_perct, [SiO2_perct, F_SiO2_1, SiO2_perct])
+                dop_perct.pop(0)
+                dop_perct = np.append(dop_perct_grad, dop_perct)
 
                 # loop to modify every layer
                 for numlayer in range(1, n_steps + 3, 1):
                     if numlayer < n_steps:
                         self.fimmap.Exec(dev + ".insertlayer(" + str(numlayer) + ")")
-                        self.fimmap.Exec(dev + '.layers[' + str(numlayer) + '].size=' + str(sizes[0]/n_steps))
+                        self.fimmap.Exec(dev + '.layers[' + str(numlayer) + '].size=' + str(sizes[0] / n_steps))
                         self.fimmap.Exec(dev + ".layers[" + str(numlayer) + "].setMAT(GeO2-SiO2)")
                         self.fimmap.Exec(dev + ".layers[" + str(numlayer) + "].mx=" + str(dop_perct[numlayer - 1]))
                     else:
                         self.fimmap.Exec(dev + '.layers[' + str(numlayer) + '].size=' + str(sizes[numlayer - n_steps]))
+                        self.fimmap.Exec(dev + '.layers[' + str(numlayer) + '].mx=' + str(dop_perct[numlayer]))
 
             case _:
                 raise EnvironmentError("type not specify or incorrect")
+
+    def update_profile(self, dev, a1, a2, a3, a4, n1_dop, n2_dop, n3_dop, n4_dop, pro_type, alpha):
+        dop_perct = [n1_dop, n2_dop, n3_dop, n4_dop]
+        sizes = [a1, a2, a3, a4]
+        # dopant percent of SiO2
+        a1_material = 'GeO2-SiO2'
+        a2_material = 'SiO2'
+        a3_material = 'F-SiO2_1'
+        a4_material = 'SiO2'
+        match pro_type:
+            case "Step Index":
+
+                # setting materials -> COMMENTED 'CAUSE WAS ALREADY SETTES
+                # self.fimmap.Exec(dev + '.layers[1].setMAT(' + a1_material + ')')
+                # self.fimmap.Exec(dev + '.layers[2].setMAT(' + a2_material + ')')
+                # self.fimmap.Exec(dev + '.layers[3].setMAT(' + a3_material + ')')
+                # self.fimmap.Exec(dev + '.layers[4].setMAT(' + a4_material + ')')
+
+                # modifying layer parameters (sizes) & setting dopant percentage
+                for numlayer in range(1, 5, 1):
+                    self.fimmap.Exec(dev + '.layers[' + str(numlayer) + '].size=' + str(sizes[numlayer - 1]))
+                    self.fimmap.Exec(dev + '.layers[' + str(numlayer) + '].mx=' + str(dop_perct[numlayer - 1]))
+
+            case "Graded":
+                n_steps = 100
+                dop_perct_grad = self.graded_dopa_gene(alpha, n1_dop, n_steps)
+                dop_perct.pop(0)
+                dop_perct = np.append(dop_perct_grad, dop_perct)
+
+                # plotting to check -> CHANGE TO PLOT DIFFERENT PARAMETERS THE PREVIOUS ONES AND THE FORMER
+                # x = np.arange(0, a1, a1 / n_steps)
+                # plt.plot(x, dop_perct_grad)
+                # plt.show()
+
+                # loop to modify every layer
+                for numlayer in range(1, n_steps + 3, 1):
+                    if numlayer < n_steps:
+                        self.fimmap.Exec(dev + '.layers[' + str(numlayer) + '].size=' + str(sizes[0] / n_steps))
+                        self.fimmap.Exec(dev + ".layers[" + str(numlayer) + "].mx=" + str(dop_perct[numlayer - 1]))
+                    else:
+                        self.fimmap.Exec(dev + '.layers[' + str(numlayer) + '].size=' + str(sizes[numlayer - n_steps]))
+                        self.fimmap.Exec(dev + '.layers[' + str(numlayer) + '].mx=' + str(dop_perct[numlayer]))
+
+            case _:
+                raise EnvironmentError("type not specify or incorrect")
+
+    def mode_data(self, dev, param_Scan=None, mode='1'):
+
+        if param_Scan is None:
+            param_Scan = {"beta": False, "neff": False, "a_eff": False, "alpha": False, "dispersion": True,
+                          "isLeaky": False, "neffg": False}
+        data = np.zeros(7)
+
+        self.fimmap.Exec(dev + ".evlist.update(1)")
+        if param_Scan['beta']:
+            data[0] = self.fimmap.Exec(dev + ".evlist.list[" + mode + "].beta()")
+        if param_Scan['neff']:
+            data[1] = self.fimmap.Exec(dev + ".evlist.list[" + mode + "].neff()")
+        self.fimmap.AddCmd(dev + ".evlist.list[" + mode + "].modedata.update(1)")
+        if param_Scan['a_eff']:
+            data[2] = self.fimmap.Exec(dev + ".evlist.list[" + mode + "].modedata.a_eff()")
+        if param_Scan['alpha']:
+            data[3] = self.fimmap.Exec(dev + ".evlist.list[" + mode + "].modedata.alpha()")
+        if param_Scan['dispersion']:
+            data[4] = self.fimmap.Exec(dev + ".evlist.list[" + mode + "].modedata.dispersion()")
+        if param_Scan['isLeaky']:
+            data[5] = self.fimmap.Exec(dev + ".evlist.list[" + mode + "].modedata.isLeaky()")
+        if param_Scan['neffg']:
+            data[6] = self.fimmap.Exec(dev + ".evlist.list[" + mode + "].modedata.neffg()")
+
+        return data
+
+    def scan_lambda(self, dev, lambda_s, lambda_e, steps, param_Scan=None):
+
+        if param_Scan is None:
+            param_Scan = {"beta": False, "neff": False, "a_eff": False, "alpha": False, "dispersion": True,
+                          "isLeaky": False, "neffg": False}
+
+        data_scan = np.zeros((steps, 7+1))
+        data_scan = data_scan.astype('str')
+
+        print("Scanning lambda and extracting: " + ", ".join([key for key, val in param_Scan.items() if val]))
+
+        for i in range(0, steps, 1):
+            lx = lambda_s + (float(i) / steps) * (lambda_e - lambda_s)
+            print("Solving Modes at " + str(lx))
+            self.fimmap.Exec(dev + ".evlist.svp.lambda=" + str(lx))
+            data_scan[i, 1:] = list(self.mode_data(dev, param_Scan))
+            data_scan[i, 0] = str(lx)
+
+        return data_scan

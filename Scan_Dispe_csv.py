@@ -127,7 +127,7 @@ fiber_profile = FiberProfile()
 for param1 in range(0, param1Steps + 1, 1):
     param1Value = param1Start + (float(param1) / param1Steps) * (param1End - param1Start)
     print("Solving Modes at " + param1name + " = " + str(param1Value) + " and")
-    dop_perc_GeO2_SiO2 = fiber_profile.graded_index_profile(4, 1,param1Value, 1.45, num1layers)
+    dop_perc_GeO2_SiO2 = fiber_profile.graded_index_gene(4, 1, param1Value, 1.45, num1layers)
 
     # loop to modify every layer
     for numlayer in range(0, num1layers, 1):
