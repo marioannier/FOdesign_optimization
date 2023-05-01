@@ -83,7 +83,7 @@ class FiberProfile:
             case _:
                 raise EnvironmentError("type not specify or incorrect")
 
-    def builder_profile(self, dev, n1_dop, n2_dop, n3_dop, n4_dop, a1, a2, a3, a4, pro_type, alpha):
+    def builder_profile(self, dev, a1, a2, a3, a4, n1_dop, n2_dop, n3_dop, n4_dop, pro_type, alpha):
         dop_perct = [n1_dop, n2_dop, n3_dop, n4_dop]
         sizes = [a1, a2, a3, a4]
         # dopant percent of SiO2
@@ -140,7 +140,7 @@ class FiberProfile:
             case _:
                 raise EnvironmentError("type not specify or incorrect")
 
-    def update_profile(self, dev, n1_dop, n2_dop, n3_dop, n4_dop, a1, a2, a3, a4, pro_type, alpha):
+    def update_profile(self, dev, a1, a2, a3, a4, n1_dop, n2_dop, n3_dop, n4_dop, pro_type, alpha):
         dop_perct = [n1_dop, n2_dop, n3_dop, n4_dop]
         sizes = [a1, a2, a3, a4]
         # dopant percent of SiO2
@@ -220,7 +220,7 @@ class FiberProfile:
         data_scan = np.zeros((steps, 7+1))
         data_scan = data_scan.astype('str')
 
-        print("Scanning lambda and extracting: " + ", ".join(param_Scan))
+        print("Scanning lambda and extracting: " + ", ".join([key for key, val in param_Scan.items() if val]))
 
         for i in range(0, steps, 1):
             lx = lambda_s + (float(i) / steps) * (lambda_e - lambda_s)
