@@ -63,7 +63,7 @@ if do_we_need_to_updatad_FWG_modules:
 a1_lower = 3
 a1_upper = 6
 # Define the ranges for each parameter
-a1_steps = 1
+a1_steps = 5
 a1 = np.linspace(a1_lower, a1_upper, a1_steps)  # for a1_steps = 1 , a1 = a1_lower
 
 a2_lower = 2
@@ -75,7 +75,7 @@ a2 = np.linspace(a2_lower, a2_upper, a2_steps)
 a3_lower = 2.5
 a3_upper = 5
 # Define the ranges for each parameter
-a3_steps = 10
+a3_steps = 1
 a3 = np.linspace(a3_lower, a3_upper, a3_steps)
 
 a4 = 5
@@ -84,7 +84,7 @@ n1 = None
 n1_dopant_lower = 0.04
 n1_dopant_upper = 0.05
 # Define the ranges for each parameter
-n1_dopant_steps = 10
+n1_dopant_steps = 5
 n1_dopant = np.linspace(n1_dopant_lower, n1_dopant_upper, n1_dopant_steps)
 
 n2 = None
@@ -125,7 +125,7 @@ header = (
     ['a1(um)', 'a2(um)', 'a3(um)', 'a4(um)', 'n1 dopant(%)', 'n2 dopant(%)', 'n3 dopant(%)', 'n4 dopant(%)', 'alpha',
      "beta", "neff", "a_eff", "alpha", "dispersion", "isLeaky", "neffg"])
 
-dev = "app.subnodes[1].subnodes[1]"
+dev = "app.subnodes[1].subnodes[2]"
 
 # Iterate over all combinations of parameters
 for a1_val in a1:
@@ -144,7 +144,7 @@ for a1_val in a1:
                                 # running the simulation
                                 fiber_profile.update_profile(dev, a1_val, a2_val, a3_val, a4, n1_dopant_val,
                                                              n2_dopant_val, n3_dopant_val, n4_dopant_val,
-                                                             "Step Index", alpha_val)
+                                                             "Graded", alpha_val)
                                 data_scan[i, 9:] = list(fiber_profile.mode_data(dev, param_Scan))
                                 data_scan[i, 0:9] = [a1_val, a2_val, a3_val, a4, n1_dopant_val,
                                                      n2_dopant_val, n3_dopant_val, n4_dopant_val,
