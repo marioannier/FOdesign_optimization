@@ -150,7 +150,6 @@ class FiberProfile:
         a4_material = 'SiO2'
         match pro_type:
             case "Step Index":
-
                 # setting materials -> COMMENTED 'CAUSE WAS ALREADY SETTES
                 # self.fimmap.Exec(dev + '.layers[1].setMAT(' + a1_material + ')')
                 # self.fimmap.Exec(dev + '.layers[2].setMAT(' + a2_material + ')')
@@ -162,7 +161,7 @@ class FiberProfile:
                     self.fimmap.Exec(dev + '.layers[' + str(numlayer) + '].size=' + str(sizes[numlayer - 1]))
                     self.fimmap.Exec(dev + '.layers[' + str(numlayer) + '].mx=' + str(dop_perct[numlayer - 1]))
 
-            case "Graded":
+            case "Triangular" | "Graded":
                 n_steps = 100
                 dop_perct_grad = self.graded_dopa_gene(alpha, n1_dop, n_steps)
                 dop_perct.pop(0)
@@ -181,6 +180,7 @@ class FiberProfile:
                     else:
                         self.fimmap.Exec(dev + '.layers[' + str(numlayer) + '].size=' + str(sizes[numlayer - n_steps]))
                         self.fimmap.Exec(dev + '.layers[' + str(numlayer) + '].mx=' + str(dop_perct[numlayer]))
+
 
             case _:
                 raise EnvironmentError("type not specify or incorrect")
