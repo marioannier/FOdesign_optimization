@@ -94,6 +94,36 @@ class MyFrameleft(customtkinter.CTkFrame):
             i += 1
         return a
 
+    def get_steps(self):
+        a = [1 for _ in range(9)]
+        i = 0
+        # default values
+        a1_steps = '1'
+        a2_steps = '1'
+        a3_steps = '1'
+        a4_steps = '1'
+        n1_dopant_steps = '1'
+        n2_dopant_steps = '1'
+        n3_dopant_steps = '1'
+        n4_dopant_steps = '1'
+        alpha_steps = '1'
+
+        a[0] = a1_steps
+        a[1] = a2_steps
+        a[2] = a3_steps
+        a[3] = a4_steps
+        a[4] = n1_dopant_steps
+        a[5] = n2_dopant_steps
+        a[6] = n3_dopant_steps
+        a[7] = n4_dopant_steps
+        a[8] = alpha_steps
+
+        for entrySteps in self.entriesSteps:
+            if entrySteps.get() != '':
+                a[i] = entrySteps.get()
+            i += 1
+        return a
+
     def action_check(self):
         i = 0
         for entry in self.entriesPamUP:
@@ -103,14 +133,6 @@ class MyFrameleft(customtkinter.CTkFrame):
             else:
                 entry.configure(state="disable", fg_color=self.matte_red)
             i = i + 1
-
-    # def get_value(self, TkObject):  # UVYUBHKJNKLYVYVUBUIOUHNIOUHUIOBOIUIOUHIUYBUOBUIGYUIY
-    #     value = []
-    #     i = 0
-    #     for value in TkObject:
-    #         value[i] = TkObject.get()
-    #         i = i + 1
-    #     return value
 
 
 class MyFrameright(customtkinter.CTkFrame):
@@ -142,6 +164,15 @@ class MyFrameright(customtkinter.CTkFrame):
         optionmenu = customtkinter.CTkOptionMenu(self, values=["Step Index", "Triangular", "Graded"])
         optionmenu.grid(row=len(values) + 3, column=0, padx=10, pady=(10, 0), sticky="w")
         optionmenu.set(choice)
+        self.optionmenus.append(optionmenu)
+
+    def get_menu(self):
+        out = self.optionmenus[0].get()
+        return out
+
+    def get_output(self):
+        # ON PROGRESS
+        A = 1
 
 
 class App(customtkinter.CTk):
@@ -149,7 +180,7 @@ class App(customtkinter.CTk):
         super().__init__()
 
         labels_input = ["a1(um)", "a2(um)", "a3(um)", "a4(um)", "n1(%)", "n2(%)", "n3(%)", "n4(%)", "alpha"]
-        values_input = [3, 5, 2.5, 5, 0.05, 0, 0.01, 0, 1]
+        values_input = [3, 2, 2.5, 5, 0.05, 0, 0.01, 0, 1]
         values_output = ["beta", "neff", "a_eff", "alpha", "dispersion", "isLeaky", "neffg"]
 
         self.title("Scan")
@@ -176,6 +207,7 @@ class App(customtkinter.CTk):
 
     def buttonRUN_callback(self):
         # get the project directory (project)
+        global dev
         root = Tk()
         root.filename = filedialog.askopenfilename(title="Select file",
                                                    filetypes=(("all files", "*.*"), ("Text files", "*.txt")))
@@ -190,62 +222,63 @@ class App(customtkinter.CTk):
         fiber_profile = FiberProfile(fimmap)
 
         values = self.frame_left.get_entry()
-        print(values)
         values_f = np.array(values).astype(float)
-        print(values_f)
+        steps = self.frame_left.get_steps()
+        steps_f = np.array(steps).astype(int)
+        fiber_p = self.frame_right.get_menu()
 
         a1_lower = values_f[0][0]
         a1_upper = values_f[0][1]
         # Define the ranges for each parameter
-        a1_steps = 5
+        a1_steps = steps_f[0]
         a1 = np.linspace(a1_lower, a1_upper, a1_steps)  # for a1_steps = 1 , a1 = a1_lower
 
         a2_lower = values_f[1][0]
         a2_upper = values_f[1][1]
         # Define the ranges for each parameter
-        a2_steps = 1
+        a2_steps = steps_f[1]
         a2 = np.linspace(a2_lower, a2_upper, a2_steps)
 
         a3_lower = values_f[2][0]
         a3_upper = values_f[2][1]
         # Define the ranges for each parameter
-        a3_steps = 1
+        a3_steps = steps_f[2]
         a3 = np.linspace(a3_lower, a3_upper, a3_steps)
 
-        a4 = values_f[5][0]
+        a4 = values_f[3][0]
 
         n1 = None
         n1_dopant_lower = values_f[4][0]
         n1_dopant_upper = values_f[4][1]
         # Define the ranges for each parameter
-        n1_dopant_steps = 5
+        n1_dopant_steps = steps_f[4]
         n1_dopant = np.linspace(n1_dopant_lower, n1_dopant_upper, n1_dopant_steps)
 
         n2 = None
         n2_dopant_lower = values_f[5][0]
         n2_dopant_upper = values_f[5][1]
         # Define the ranges for each parameter
-        n2_dopant_steps = 1
+        n2_dopant_steps = steps_f[5]
         n2_dopant = np.linspace(n2_dopant_lower, n2_dopant_upper, n2_dopant_steps)
 
         n3 = None
         n3_dopant_lower = values_f[6][0]
         n3_dopant_upper = values_f[6][1]
         # Define the ranges for each parameter
-        n3_dopant_steps = 1
+        n3_dopant_steps = steps_f[6]
         n3_dopant = np.linspace(n3_dopant_lower, n3_dopant_upper, n3_dopant_steps)
 
         n4 = None
         n4_dopant_lower = values_f[7][0]
         n4_dopant_upper = values_f[7][1]
         # Define the ranges for each parameter
-        n4_dopant_steps = 1
+        n4_dopant_steps = steps_f[7]
         n4_dopant = np.linspace(n4_dopant_lower, n4_dopant_upper, n4_dopant_steps)
 
         alpha_lower = values_f[8][0]
         alpha_upper = values_f[8][1]
         # Define the ranges for each parameter
-        alpha_steps = 1
+        alpha_steps = steps_f[8]
         alpha = np.linspace(alpha_lower, alpha_upper, alpha_steps)
 
         # creating variable to store the result
@@ -261,7 +294,12 @@ class App(customtkinter.CTk):
              'alpha',
              "beta", "neff", "a_eff", "alpha", "dispersion", "isLeaky", "neffg"])
 
-        dev = "app.subnodes[1].subnodes[2]"
+        if fiber_p == 'Step Index':
+            dev = "app.subnodes[1].subnodes[1]"
+        if fiber_p == 'Triangular':
+            dev = "app.subnodes[1].subnodes[2]"
+        if fiber_p == 'Graded':
+            dev = "app.subnodes[1].subnodes[3]"
 
         # Iterate over all combinations of parameters
         for a1_val in a1:
@@ -272,16 +310,10 @@ class App(customtkinter.CTk):
                             for n3_dopant_val in n3_dopant:
                                 for n4_dopant_val in n4_dopant:
                                     for alpha_val in alpha:
-                                        print(
-                                            f"Scanning for a1 = {a1_val}, a2 = {a2_val}, a3 = {a3_val}, a4 = {a4}, n1_dopant ="
-                                            f" {n1_dopant_val}, n2_dopant = {n2_dopant_val}, n3_dopant = {n3_dopant_val}, "
-                                            f"n4_dopant = {n4_dopant_val}, alpha = {alpha_val}")
-                                        print("and extracting: " + ", ".join(
-                                            [key for key, val in param_Scan.items() if val]))
                                         # running the simulation
                                         fiber_profile.update_profile(dev, a1_val, a2_val, a3_val, a4, n1_dopant_val,
                                                                      n2_dopant_val, n3_dopant_val, n4_dopant_val,
-                                                                     "Step Index", alpha_val)
+                                                                     fiber_p, alpha_val)
                                         data_scan[i, 9:] = list(fiber_profile.mode_data(dev, param_Scan))
                                         data_scan[i, 0:9] = [a1_val, a2_val, a3_val, a4, n1_dopant_val,
                                                              n2_dopant_val, n3_dopant_val, n4_dopant_val,
@@ -296,6 +328,7 @@ class App(customtkinter.CTk):
 
         f.close()
         del fimmap
+        print('DONE')
 
 
 app = App()
