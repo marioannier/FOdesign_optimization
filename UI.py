@@ -4,7 +4,7 @@ from tkinter import filedialog
 from tkinter import *
 
 import numpy as np
-
+import time
 
 class MyFrameleft(customtkinter.CTkFrame):
     def __init__(self, master, labels, values):
@@ -199,14 +199,22 @@ class App(customtkinter.CTk):
         self.button.grid(row=3, column=1, padx=10, pady=10)
 
         self.label = customtkinter.CTkLabel(self, text="Estimated simulation time", fg_color="transparent")
-        self.label.grid(row=3, column=0, padx=100, pady=(10, 0), sticky="w")
+        self.label.grid(row=3, column=0, padx=10, pady=(10, 0), sticky="w")
 
-        time = '--:--:-- (not available yet)'
-        self.label = customtkinter.CTkLabel(self, text=time, fg_color="transparent")
-        self.label.grid(row=3, column=0, padx=100, pady=(10, 0), sticky="e")
+
+        time = '--:--:--'
+        self.label_t = customtkinter.CTkLabel(self, text=time, fg_color="transparent")
+        self.label_t.grid(row=3, column=0, padx=180, pady=(10, 0), sticky="w")
+
+        self.progressbar = customtkinter.CTkProgressBar(self, orientation="horizontal")
+        self.progressbar.grid(row=3, column=0, padx=10, pady=(10, 0), sticky="e")
+        self.progressbar.configure(height=15, corner_radius=4, progress_color='green')
+
+
 
     def buttonRUN_callback(self):
         # get the project directory (project)
+        start_time = time.time()
         global dev
         root = Tk()
         root.filename = filedialog.askopenfilename(title="Select file",
@@ -296,10 +304,16 @@ class App(customtkinter.CTk):
 
         if fiber_p == 'Step Index':
             dev = "app.subnodes[1].subnodes[1]"
+            one_sim = 0.3
         if fiber_p == 'Triangular':
             dev = "app.subnodes[1].subnodes[2]"
+            one_sim = 15
         if fiber_p == 'Graded':
             dev = "app.subnodes[1].subnodes[3]"
+            one_sim = 10
+        time_sim = str(one_sim * steps)+' seg = ' + str((one_sim * steps)/60) + ' min = ' + str((one_sim * steps)/3600) + ' h'
+        self.label_t.configure(text=time_sim)
+        print('Simulation estimeted time: '+time_sim)
 
         # Iterate over all combinations of parameters
         for a1_val in a1:
@@ -311,6 +325,8 @@ class App(customtkinter.CTk):
                                 for n4_dopant_val in n4_dopant:
                                     for alpha_val in alpha:
                                         # running the simulation
+                                        start_time = time.time()
+
                                         fiber_profile.update_profile(dev, a1_val, a2_val, a3_val, a4, n1_dopant_val,
                                                                      n2_dopant_val, n3_dopant_val, n4_dopant_val,
                                                                      fiber_p, alpha_val)
@@ -319,6 +335,12 @@ class App(customtkinter.CTk):
                                                              n2_dopant_val, n3_dopant_val, n4_dopant_val,
                                                              alpha_val]
                                         i = i + 1
+                                        self.progressbar.set(i/steps)
+                                        print('Simulation goes for: '+str(100*i/steps)+' %')
+                                        end_time = time.time()
+                                        elapsed_time = end_time - start_time
+                                        print("Simulation took {:.2f} seconds to run.".format(elapsed_time))
+
         data_scan = data_scan.astype('str')
         # add the new row to the top of the array
         data_scan = np.vstack((header, data_scan))
