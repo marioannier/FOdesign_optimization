@@ -194,9 +194,9 @@ class FiberProfile:
 
         self.fimmap.Exec(dev + ".evlist.update(1)")
         if param_Scan['beta']:
-            data[0] = self.fimmap.Exec(dev + ".evlist.list[" + mode + "].beta()")
+            data[0] = np.real(self.fimmap.Exec(dev + ".evlist.list[" + mode + "].beta()")) # because the FIMM retun a (a+bj), complex number
         if param_Scan['neff']:
-            data[1] = self.fimmap.Exec(dev + ".evlist.list[" + mode + "].neff()")
+            data[1] = np.real(self.fimmap.Exec(dev + ".evlist.list[" + mode + "].neff()")) # because the FIMM return a (a+bj), complex number
         self.fimmap.AddCmd(dev + ".evlist.list[" + mode + "].modedata.update(1)")
         if param_Scan['a_eff']:
             data[2] = self.fimmap.Exec(dev + ".evlist.list[" + mode + "].modedata.a_eff()")
