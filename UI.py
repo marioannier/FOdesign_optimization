@@ -6,6 +6,7 @@ from tkinter import *
 import numpy as np
 import time
 
+
 class MyFrameleft(customtkinter.CTkFrame):
     def __init__(self, master, labels, values):
         super().__init__(master)
@@ -201,7 +202,6 @@ class App(customtkinter.CTk):
         self.label = customtkinter.CTkLabel(self, text="Estimated simulation time", fg_color="transparent")
         self.label.grid(row=3, column=0, padx=10, pady=(10, 0), sticky="w")
 
-
         time = '--:--:--'
         self.label_t = customtkinter.CTkLabel(self, text=time, fg_color="transparent")
         self.label_t.grid(row=3, column=0, padx=180, pady=(10, 0), sticky="w")
@@ -209,8 +209,6 @@ class App(customtkinter.CTk):
         self.progressbar = customtkinter.CTkProgressBar(self, orientation="horizontal")
         self.progressbar.grid(row=3, column=0, padx=10, pady=(10, 0), sticky="e")
         self.progressbar.configure(height=15, corner_radius=4, progress_color='green')
-
-
 
     def buttonRUN_callback(self):
         # get the project directory (project)
@@ -296,7 +294,7 @@ class App(customtkinter.CTk):
         i = 0
 
         param_Scan = {"beta": True, "neff": True, "a_eff": True, "alpha": True, "dispersion": True, "isLeaky": True,
-                      "neffg": True, "fillFac":True, "gammaE":True}
+                      "neffg": True, "fillFac": True, "gammaE": True}
         header = (
             ['a1(um)', 'a2(um)', 'a3(um)', 'a4(um)', 'n1 dopant(%)', 'n2 dopant(%)', 'n3 dopant(%)', 'n4 dopant(%)',
              'alpha',
@@ -304,16 +302,18 @@ class App(customtkinter.CTk):
 
         if fiber_p == 'Step Index':
             dev = "app.subnodes[1].subnodes[1]"
-            one_sim = 0.3
+            one_sim = 0.9
         if fiber_p == 'Triangular':
             dev = "app.subnodes[1].subnodes[2]"
-            one_sim = 15
+            one_sim = 6
         if fiber_p == 'Graded':
             dev = "app.subnodes[1].subnodes[3]"
-            one_sim = 10
-        time_sim = str(one_sim * steps)+' seg = ' + str((one_sim * steps)/60) + ' min = ' + str(np.around((one_sim * steps)/3600, decimals=2)) + ' h'
+            one_sim = 6
+        time_sim = str(one_sim * steps) + ' seg = ' + str((one_sim * steps) / 60) + ' min = ' + str(
+            np.around((one_sim * steps) / 3600, decimals=2)) + ' h'
+        elapsed_time = np.zeros(steps)
         self.label_t.configure(text=time_sim)
-        print('Simulation estimeted time: '+time_sim)
+        print('Simulation estimeted time: ' + time_sim)
 
         # Iterate over all combinations of parameters
         for a1_val in a1:
@@ -334,13 +334,13 @@ class App(customtkinter.CTk):
                                         data_scan[i, 0:9] = [a1_val, a2_val, a3_val, a4, n1_dopant_val,
                                                              n2_dopant_val, n3_dopant_val, n4_dopant_val,
                                                              alpha_val]
-                                        i = i + 1
-                                        self.progressbar.set(i/steps)
-                                        print('Simulation goes for: '+str(100*i/steps)+' %')
                                         end_time = time.time()
-                                        # elapsed_time = end_time - start_time
-                                        # print("Simulation took {:.2f} seconds to run.".format(elapsed_time))
+                                        elapsed_time[i] = end_time - start_time
+                                        i = i + 1
+                                        self.progressbar.set(i / steps)
+                                        print('Simulation goes for: ' + str(100 * i / steps) + ' %')
 
+        print("Average Simulation took {:.2f} seconds to run.".format(np.average(elapsed_time)))
         data_scan = data_scan.astype('str')
         # add the new row to the top of the array
         data_scan = np.vstack((header, data_scan))
