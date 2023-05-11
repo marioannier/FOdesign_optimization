@@ -160,6 +160,8 @@ class FiberProfile:
                 for numlayer in range(1, 5, 1):
                     self.fimmap.Exec(dev + '.layers[' + str(numlayer) + '].size=' + str(sizes[numlayer - 1]))
                     self.fimmap.Exec(dev + '.layers[' + str(numlayer) + '].mx=' + str(dop_perct[numlayer - 1]))
+                    if numlayer == 1:
+                        self.fimmap.Exec(dev + '.layers[' + str(numlayer) + '].cfseg=1')
 
             case "Triangular" | "Graded":
                 n_steps = 100
@@ -177,10 +179,10 @@ class FiberProfile:
                     if numlayer < n_steps:
                         self.fimmap.Exec(dev + '.layers[' + str(numlayer) + '].size=' + str(sizes[0] / n_steps))
                         self.fimmap.Exec(dev + ".layers[" + str(numlayer) + "].mx=" + str(dop_perct[numlayer - 1]))
+                        self.fimmap.Exec(dev + '.layers[' + str(numlayer) + '].cfseg=1')
                     else:
                         self.fimmap.Exec(dev + '.layers[' + str(numlayer) + '].size=' + str(sizes[numlayer - n_steps]))
                         self.fimmap.Exec(dev + '.layers[' + str(numlayer) + '].mx=' + str(dop_perct[numlayer]))
-
 
             case _:
                 raise EnvironmentError("type not specify or incorrect")
@@ -189,14 +191,16 @@ class FiberProfile:
 
         if param_Scan is None:
             param_Scan = {"beta": False, "neff": False, "a_eff": False, "alpha": False, "dispersion": True,
-                          "isLeaky": False, "neffg": False}
-        data = np.zeros(7)
+                          "isLeaky": False, "neffg": False, "fillFac": False, "gammaE": False}
+        data = np.zeros(9)
 
         self.fimmap.Exec(dev + ".evlist.update(1)")
         if param_Scan['beta']:
-            data[0] = np.real(self.fimmap.Exec(dev + ".evlist.list[" + mode + "].beta()")) # because the FIMM retun a (a+bj), complex number
+            data[0] = np.real(self.fimmap.Exec(
+                dev + ".evlist.list[" + mode + "].beta()"))  # because the FIMM retun a (a+bj), complex number
         if param_Scan['neff']:
-            data[1] = np.real(self.fimmap.Exec(dev + ".evlist.list[" + mode + "].neff()")) # because the FIMM return a (a+bj), complex number
+            data[1] = np.real(self.fimmap.Exec(
+                dev + ".evlist.list[" + mode + "].neff()"))  # because the FIMM return a (a+bj), complex number
         self.fimmap.AddCmd(dev + ".evlist.list[" + mode + "].modedata.update(1)")
         if param_Scan['a_eff']:
             data[2] = self.fimmap.Exec(dev + ".evlist.list[" + mode + "].modedata.a_eff()")
@@ -208,6 +212,10 @@ class FiberProfile:
             data[5] = self.fimmap.Exec(dev + ".evlist.list[" + mode + "].modedata.isLeaky()")
         if param_Scan['neffg']:
             data[6] = self.fimmap.Exec(dev + ".evlist.list[" + mode + "].modedata.neffg()")
+        if param_Scan['fillFac']:
+            data[7] = self.fimmap.Exec(dev + ".evlist.list[" + mode + "].modedata.fillFac()")
+        if param_Scan['gammaE']:
+            data[8] = self.fimmap.Exec(dev + ".evlist.list[" + mode + "].modedata.gammaE()")
 
         return data
 
@@ -215,9 +223,9 @@ class FiberProfile:
 
         if param_Scan is None:
             param_Scan = {"beta": False, "neff": False, "a_eff": False, "alpha": False, "dispersion": True,
-                          "isLeaky": False, "neffg": False}
+                          "isLeaky": False, "neffg": False, "fillFac": False, "gammaE": False}
 
-        data_scan = np.zeros((steps, 7+1))
+        data_scan = np.zeros((steps, 9 + 1))  # 9 because is the number of output parame
         data_scan = data_scan.astype('str')
 
         print("Scanning lambda and extracting: " + ", ".join([key for key, val in param_Scan.items() if val]))

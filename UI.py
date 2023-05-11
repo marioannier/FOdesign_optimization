@@ -63,13 +63,13 @@ class MyFrameleft(customtkinter.CTkFrame):
         a3_lower = 2.5
         a3_upper = 5
         a4_lower = 5
-        a4_upper = 5
+        a4_upper = 15
         n1_dopant_lower = 0.04
         n1_dopant_upper = 0.05
         n2_dopant_lower = 0
         n2_dopant_upper = 0
-        n3_dopant_lower = 0.001
-        n3_dopant_upper = 0.001
+        n3_dopant_lower = 0
+        n3_dopant_upper = 0
         n4_dopant_lower = 0
         n4_dopant_upper = 0
         alpha_lower = 1
@@ -180,7 +180,7 @@ class App(customtkinter.CTk):
         super().__init__()
 
         labels_input = ["a1(um)", "a2(um)", "a3(um)", "a4(um)", "n1(%)", "n2(%)", "n3(%)", "n4(%)", "alpha"]
-        values_input = [3, 2, 2.5, 5, 0.05, 0, 0.01, 0, 1]
+        values_input = [3, 2, 2.5, 15, 0.05, 0, 0, 0, 1]
         values_output = ["beta", "neff", "a_eff", "alpha", "dispersion", "isLeaky", "neffg"]
 
         self.title("Scan")
@@ -292,15 +292,15 @@ class App(customtkinter.CTk):
         # creating variable to store the result
         steps = a1_steps * a2_steps * a3_steps * n1_dopant_steps * n2_dopant_steps * n3_dopant_steps * n4_dopant_steps * alpha_steps
         data_scan = np.zeros(
-            (steps, 7 + 9))  # 7-> max output of fiber_profile.mode_data() and 9 -> number of fiber parameters
+            (steps, 9 + 9))  # 9-> max output of fiber_profile.mode_data() and 9 -> number of fiber parameters
         i = 0
 
         param_Scan = {"beta": True, "neff": True, "a_eff": True, "alpha": True, "dispersion": True, "isLeaky": True,
-                      "neffg": True}
+                      "neffg": True, "fillFac":True, "gammaE":True}
         header = (
             ['a1(um)', 'a2(um)', 'a3(um)', 'a4(um)', 'n1 dopant(%)', 'n2 dopant(%)', 'n3 dopant(%)', 'n4 dopant(%)',
              'alpha',
-             "beta (Real)", "neff (Real)", "a_eff", "alpha", "dispersion", "isLeaky", "neffg"])
+             "beta (Real)", "neff (Real)", "a_eff", "alpha", "dispersion", "isLeaky", "neffg", "fillFac", "gammaE"])
 
         if fiber_p == 'Step Index':
             dev = "app.subnodes[1].subnodes[1]"
@@ -325,7 +325,7 @@ class App(customtkinter.CTk):
                                 for n4_dopant_val in n4_dopant:
                                     for alpha_val in alpha:
                                         # running the simulation
-                                        # start_time = time.time()
+                                        start_time = time.time()
 
                                         fiber_profile.update_profile(dev, a1_val, a2_val, a3_val, a4, n1_dopant_val,
                                                                      n2_dopant_val, n3_dopant_val, n4_dopant_val,
@@ -337,7 +337,7 @@ class App(customtkinter.CTk):
                                         i = i + 1
                                         self.progressbar.set(i/steps)
                                         print('Simulation goes for: '+str(100*i/steps)+' %')
-                                        # end_time = time.time()
+                                        end_time = time.time()
                                         # elapsed_time = end_time - start_time
                                         # print("Simulation took {:.2f} seconds to run.".format(elapsed_time))
 
