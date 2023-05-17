@@ -74,12 +74,12 @@ class FiberProfile:
             case "Triangular":
                 name = 'triangular'
                 self.fimmap.Exec('app.subnodes[1].addsubnode(fwguideNode,' + name + ')')
-                self.fimmap.Exec('app.subnodes[1].subnodes[2].setmaterbase("' + data_base + '")')
+                self.fimmap.Exec('app.subnodes[1].subnodes[1].setmaterbase("' + data_base + '")')
 
             case "Graded":
                 name = 'graded'
                 self.fimmap.Exec('app.subnodes[1].addsubnode(fwguideNode,' + name + ')')
-                self.fimmap.Exec('app.subnodes[1].subnodes[3].setmaterbase("' + data_base + '")')
+                self.fimmap.Exec('app.subnodes[1].subnodes[1].setmaterbase("' + data_base + '")')
             case _:
                 raise EnvironmentError("type not specify or incorrect")
 
@@ -134,7 +134,7 @@ class FiberProfile:
                         self.fimmap.Exec(dev + ".layers[" + str(numlayer) + "].setMAT(GeO2-SiO2)")
                         self.fimmap.Exec(dev + ".layers[" + str(numlayer) + "].mx=" + str(dop_perct[numlayer - 1]))
                     else:
-                        self.fimmap.Exec(dev + '.layers[' + str(numlayer) + '].size=' + str(sizes[numlayer - n_steps]))
+                        self.fimmap.Exec(dev + '.layers[' + str(numlayer) + '].size=' + str(sizes[numlayer - n_steps + 1]))
                         self.fimmap.Exec(dev + '.layers[' + str(numlayer) + '].mx=' + str(dop_perct[numlayer]))
 
             case _:
@@ -176,12 +176,12 @@ class FiberProfile:
 
                 # loop to modify every layer
                 for numlayer in range(1, n_steps + 3, 1):
-                    if numlayer < n_steps:
+                    if n_steps > numlayer:
                         self.fimmap.Exec(dev + '.layers[' + str(numlayer) + '].size=' + str(sizes[0] / n_steps))
                         self.fimmap.Exec(dev + ".layers[" + str(numlayer) + "].mx=" + str(dop_perct[numlayer - 1]))
                         self.fimmap.Exec(dev + '.layers[' + str(numlayer) + '].cfseg=1')
                     else:
-                        self.fimmap.Exec(dev + '.layers[' + str(numlayer) + '].size=' + str(sizes[numlayer - n_steps]))
+                        self.fimmap.Exec(dev + '.layers[' + str(numlayer) + '].size=' + str(sizes[numlayer - n_steps + 1]))
                         self.fimmap.Exec(dev + '.layers[' + str(numlayer) + '].mx=' + str(dop_perct[numlayer]))
 
             case _:
