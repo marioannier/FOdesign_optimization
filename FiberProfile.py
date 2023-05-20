@@ -107,8 +107,10 @@ class FiberProfile:
                 for numlayer in range(1, 5, 1):
                     self.fimmap.Exec(dev + '.layers[' + str(numlayer) + '].size=' + str(sizes[numlayer - 1]))
                     self.fimmap.Exec(dev + '.layers[' + str(numlayer) + '].mx=' + str(dop_perct[numlayer - 1]))
+                    if numlayer == 1:
+                        self.fimmap.Exec(dev + '.layers[' + str(numlayer) + '].cfseg=1')
 
-            case "Graded":
+            case "Triangular" | "Graded":
                 n_steps = 100
                 # creating layers
                 self.fimmap.Exec(dev + ".insertlayer(3)")
@@ -119,9 +121,9 @@ class FiberProfile:
                 dop_perct_grad = self.graded_dopa_gene(alpha, n1_dop, n_steps)
 
                 # plotting to check
-                x = np.arange(0, a1, a1 / n_steps)
-                plt.plot(x, dop_perct_grad)
-                plt.show()
+                # x = np.arange(0, a1, a1 / n_steps)
+                # plt.plot(x, dop_perct_grad)
+                # plt.show()
 
                 dop_perct.pop(0)
                 dop_perct = np.append(dop_perct_grad, dop_perct)
@@ -133,6 +135,7 @@ class FiberProfile:
                         self.fimmap.Exec(dev + '.layers[' + str(numlayer) + '].size=' + str(sizes[0] / n_steps))
                         self.fimmap.Exec(dev + ".layers[" + str(numlayer) + "].setMAT(GeO2-SiO2)")
                         self.fimmap.Exec(dev + ".layers[" + str(numlayer) + "].mx=" + str(dop_perct[numlayer - 1]))
+                        self.fimmap.Exec(dev + '.layers[' + str(numlayer) + '].cfseg=1')
                     else:
                         self.fimmap.Exec(dev + '.layers[' + str(numlayer) + '].size=' + str(sizes[numlayer - n_steps + 1]))
                         self.fimmap.Exec(dev + '.layers[' + str(numlayer) + '].mx=' + str(dop_perct[numlayer]))

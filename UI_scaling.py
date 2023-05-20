@@ -13,17 +13,14 @@ class MyFrameleft(customtkinter.CTkFrame):
         self.grid_columnconfigure(0, weight=1)
         self.values = values
         self.labels = labels
-        self.checkboxes = []
         self.entriesPamDW = []
-        self.entriesPamUP = []
-        self.entriesSteps = []
         self.matte_red = ('#FF6666', '#993333')
         self.matte_green = ('#66CC66', '#336633')
 
-        self.title = customtkinter.CTkLabel(self, text="Variable", fg_color="transparent", corner_radius=6)
+        self.title = customtkinter.CTkLabel(self, text="xxxxxxxxxxxxxxx", fg_color="transparent", corner_radius=6)
         self.title.grid(row=0, column=3, padx=0, pady=(10, 0), sticky="w")
 
-        self.title = customtkinter.CTkLabel(self, text="Steps", fg_color="transparent", corner_radius=6)
+        self.title = customtkinter.CTkLabel(self, text="xxxxxxxxxxxxxxx", fg_color="transparent", corner_radius=6)
         self.title.grid(row=0, column=4, padx=0, pady=(10, 0), sticky="w")
 
         for i, label in enumerate(self.labels):
@@ -36,104 +33,36 @@ class MyFrameleft(customtkinter.CTkFrame):
             entry.grid(row=i + 1, column=1, padx=10, pady=(10, 0))
             self.entriesPamDW.append(entry)
 
-            # entries, upper value
-            entry = customtkinter.CTkEntry(self, placeholder_text="Enter the value", fg_color=self.matte_red)
-            entry.grid(row=i + 1, column=2, padx=10, pady=(10, 0))
-            entry.configure(state="disabled")
-            self.entriesPamUP.append(entry)
-
-            # check boxes
-            checkbox = customtkinter.CTkCheckBox(self, text="", command=self.action_check)
-            checkbox.grid(row=i + 1, column=3, padx=10, pady=(10, 0))
-            self.checkboxes.append(checkbox)
-
-            # number of steps
-            entry = customtkinter.CTkEntry(self, placeholder_text="1")
-            entry.grid(row=i + 1, column=4, padx=(0, 30), pady=(10, 0), sticky="e")
-            self.entriesSteps.append(entry)
-            entry.configure(width=40)
-
     def get_entry(self):
-        a = [[] for _ in range(9)]
+        a = np.zeros(9)
         i = 0
         # default values
-        a1_lower = 3
-        a1_upper = 6
-        a2_lower = 2
-        a2_upper = 3.5
-        a3_lower = 2.5
-        a3_upper = 5
-        a4_lower = 15
-        a4_upper = 15
-        n1_dopant_lower = 0.04
-        n1_dopant_upper = 0.06
-        n2_dopant_lower = 0
-        n2_dopant_upper = 0
-        n3_dopant_lower = 0
-        n3_dopant_upper = 0
-        n4_dopant_lower = 0
-        n4_dopant_upper = 0
-        alpha_lower = 1
-        alpha_upper = 3
+        a1 = 3.3
+        a2 = 4.5
+        a3 = 1.3
+        a4 = 10
+        n1_dopant = 0.075
+        n2_dopant = 0
+        n3_dopant = 0
+        n4_dopant = 0
+        alpha = 1
 
-        # Assign the lower and upper bounds to the first and second elements of the array respectively
-        a[0] = [a1_lower, a1_upper]
-        a[1] = [a2_lower, a2_upper]
-        a[2] = [a3_lower, a3_upper]
-        a[3] = [a4_lower, a4_upper]
-        a[4] = [n1_dopant_lower, n1_dopant_upper]
-        a[5] = [n2_dopant_lower, n2_dopant_upper]
-        a[6] = [n3_dopant_lower, n3_dopant_upper]
-        a[7] = [n4_dopant_lower, n4_dopant_upper]
-        a[8] = [alpha_lower, alpha_upper]
+        # Assign the values
+        a[0] = a1
+        a[1] = a2
+        a[2] = a3
+        a[3] = a4
+        a[4] = n1_dopant
+        a[5] = n2_dopant
+        a[6] = n3_dopant
+        a[7] = n4_dopant
+        a[8] = alpha
 
-        for entryDW, entryUP in zip(self.entriesPamDW, self.entriesPamUP):
+        for entryDW in self.entriesPamDW:
             if entryDW.get() != '':
-                a[i][0] = entryDW.get()
-            if entryUP.get() != '':
-                a[i][1] = entryUP.get()
+                a[i] = entryDW.get()
             i += 1
         return a
-
-    def get_steps(self):
-        a = [1 for _ in range(9)]
-        i = 0
-        # default values
-        a1_steps = '1'
-        a2_steps = '1'
-        a3_steps = '1'
-        a4_steps = '1'
-        n1_dopant_steps = '1'
-        n2_dopant_steps = '1'
-        n3_dopant_steps = '1'
-        n4_dopant_steps = '1'
-        alpha_steps = '1'
-
-        a[0] = a1_steps
-        a[1] = a2_steps
-        a[2] = a3_steps
-        a[3] = a4_steps
-        a[4] = n1_dopant_steps
-        a[5] = n2_dopant_steps
-        a[6] = n3_dopant_steps
-        a[7] = n4_dopant_steps
-        a[8] = alpha_steps
-
-        for entrySteps in self.entriesSteps:
-            if entrySteps.get() != '':
-                a[i] = entrySteps.get()
-            i += 1
-        return a
-
-    def action_check(self):
-        i = 0
-        for entry in self.entriesPamUP:
-            a = self.checkboxes[i].get()
-            if a == 1:
-                entry.configure(state="normal", fg_color=self.matte_green)
-            else:
-                entry.configure(state="disable", fg_color=self.matte_red)
-            i = i + 1
 
 
 class MyFrameright(customtkinter.CTkFrame):
@@ -170,10 +99,6 @@ class MyFrameright(customtkinter.CTkFrame):
     def get_menu(self):
         out = self.optionmenus[0].get()
         return out
-
-    def get_output(self):
-        # ON PROGRESS
-        A = 1
 
 
 class App(customtkinter.CTk):
@@ -229,75 +154,32 @@ class App(customtkinter.CTk):
 
         values = self.frame_left.get_entry()
         values_f = np.array(values).astype(float)
-        steps = self.frame_left.get_steps()
-        steps_f = np.array(steps).astype(int)
         fiber_p = self.frame_right.get_menu()
 
-        a1_lower = values_f[0][0]
-        a1_upper = values_f[0][1]
-        # Define the ranges for each parameter
-        a1_steps = steps_f[0]
-        a1 = np.linspace(a1_lower, a1_upper, a1_steps)  # for a1_steps = 1 , a1 = a1_lower
-
-        a2_lower = values_f[1][0]
-        a2_upper = values_f[1][1]
-        # Define the ranges for each parameter
-        a2_steps = steps_f[1]
-        a2 = np.linspace(a2_lower, a2_upper, a2_steps)
-
-        a3_lower = values_f[2][0]
-        a3_upper = values_f[2][1]
-        # Define the ranges for each parameter
-        a3_steps = steps_f[2]
-        a3 = np.linspace(a3_lower, a3_upper, a3_steps)
-
-        a4 = values_f[3][0]
-
-        n1 = None
-        n1_dopant_lower = values_f[4][0]
-        n1_dopant_upper = values_f[4][1]
-        # Define the ranges for each parameter
-        n1_dopant_steps = steps_f[4]
-        n1_dopant = np.linspace(n1_dopant_lower, n1_dopant_upper, n1_dopant_steps)
-
-        n2 = None
-        n2_dopant_lower = values_f[5][0]
-        n2_dopant_upper = values_f[5][1]
-        # Define the ranges for each parameter
-        n2_dopant_steps = steps_f[5]
-        n2_dopant = np.linspace(n2_dopant_lower, n2_dopant_upper, n2_dopant_steps)
-
-        n3 = None
-        n3_dopant_lower = values_f[6][0]
-        n3_dopant_upper = values_f[6][1]
-        # Define the ranges for each parameter
-        n3_dopant_steps = steps_f[6]
-        n3_dopant = np.linspace(n3_dopant_lower, n3_dopant_upper, n3_dopant_steps)
-
-        n4 = None
-        n4_dopant_lower = values_f[7][0]
-        n4_dopant_upper = values_f[7][1]
-        # Define the ranges for each parameter
-        n4_dopant_steps = steps_f[7]
-        n4_dopant = np.linspace(n4_dopant_lower, n4_dopant_upper, n4_dopant_steps)
-
-        alpha_lower = values_f[8][0]
-        alpha_upper = values_f[8][1]
-        # Define the ranges for each parameter
-        alpha_steps = steps_f[8]
-        alpha = np.linspace(alpha_lower, alpha_upper, alpha_steps)
+        # this variable define the number of steps in terms of scaling factor
+        scaling_steps = 1000
+        max_scaling_factor = 2
+        steps = np.linspace(1, max_scaling_factor, scaling_steps)
+        a1 = np.linspace(values_f[0], values_f[0]*max_scaling_factor, scaling_steps)
+        a2 = np.linspace(values_f[1], values_f[1]*max_scaling_factor, scaling_steps)
+        a3 = np.linspace(values_f[2], values_f[2]*max_scaling_factor, scaling_steps)
+        a4 = values_f[3]
+        n1_dopant = values_f[4]
+        n2_dopant = values_f[5]
+        n3_dopant = values_f[6]
+        n4_dopant = values_f[7]
+        alpha = values_f[8]
 
         # creating variable to store the result
-        steps = a1_steps * a2_steps * a3_steps * n1_dopant_steps * n2_dopant_steps * n3_dopant_steps * n4_dopant_steps * alpha_steps
         data_scan = np.zeros(
-            (steps, 9 + 9))  # 9-> max output of fiber_profile.mode_data() and 9 -> number of fiber parameters
+            (scaling_steps, 10 + 9))  # 10 -> number of fiber parameters and 9-> max output of fiber_profile.mode_data()
         i = 0
 
         param_Scan = {"beta": True, "neff": True, "a_eff": True, "alpha": True, "dispersion": True, "isLeaky": True,
                       "neffg": True, "fillFac": True, "gammaE": True}
         header = (
-            ['a1(um)', 'a2(um)', 'a3(um)', 'a4(um)', 'n1 dopant(%)', 'n2 dopant(%)', 'n3 dopant(%)', 'n4 dopant(%)',
-             'alpha',
+            ['scaling factor', 'a1(um)', 'a2(um)', 'a3(um)', 'a4(um)', 'n1 dopant(%)', 'n2 dopant(%)', 'n3 dopant(%)',
+             'n4 dopant(%)', 'alpha',
              "beta (Real)", "neff (Real)", "a_eff", "alpha", "dispersion", "isLeaky", "neffg", "fillFac", "gammaE"])
 
         if fiber_p == 'Step Index':
@@ -309,36 +191,34 @@ class App(customtkinter.CTk):
         if fiber_p == 'Graded':
             dev = "app.subnodes[1].subnodes[3]"
             one_sim = 7
-        time_sim = str(one_sim * steps) + ' seg = ' + str(np.around((one_sim * steps) / 60, decimals=5)) + ' min = ' \
-                   + str(np.around((one_sim * steps) / 3600, decimals=3)) + ' h'
-        elapsed_time = np.zeros(steps)
+
+        time_sim = str(one_sim * scaling_steps) + ' seg = ' + str(
+            np.around((one_sim * scaling_steps) / 60, decimals=3)) + ' min = ' \
+                   + str(np.around((one_sim * scaling_steps) / 3600, decimals=3)) + ' h'
+        elapsed_time = np.zeros(scaling_steps)
         self.label_t.configure(text=time_sim)
         print('Simulation estimeted time: ' + time_sim)
 
-        # Iterate over all combinations of parameters
-        for a1_val in a1:
-            for a2_val in a2:
-                for a3_val in a3:
-                    for n1_dopant_val in n1_dopant:
-                        for n2_dopant_val in n2_dopant:
-                            for n3_dopant_val in n3_dopant:
-                                for n4_dopant_val in n4_dopant:
-                                    for alpha_val in alpha:
-                                        # running the simulation
-                                        start_time = time.time()
+        # Iterate over all scaling values
+        for sca_fact in steps:
+            # running the simulation
+            start_time = time.time()
+            fiber_profile.update_profile(dev, a1[i], a2[i], a3[i], a4, n1_dopant,
+                                         n2_dopant, n3_dopant, n4_dopant,
+                                         fiber_p, alpha)
+            data_scan[i, 10:] = list(fiber_profile.mode_data(dev, param_Scan))
+            data_scan[i, 0:10] = [sca_fact, a1[i], a2[i], a3[i], a4, n1_dopant,
+                                  n2_dopant, n3_dopant, n4_dopant,
+                                  alpha]
 
-                                        fiber_profile.update_profile(dev, a1_val, a2_val, a3_val, a4, n1_dopant_val,
-                                                                     n2_dopant_val, n3_dopant_val, n4_dopant_val,
-                                                                     fiber_p, alpha_val)
-                                        data_scan[i, 9:] = list(fiber_profile.mode_data(dev, param_Scan))
-                                        data_scan[i, 0:9] = [a1_val, a2_val, a3_val, a4, n1_dopant_val,
-                                                             n2_dopant_val, n3_dopant_val, n4_dopant_val,
-                                                             alpha_val]
-                                        end_time = time.time()
-                                        elapsed_time[i] = end_time - start_time
-                                        i = i + 1
-                                        self.progressbar.set(i / steps)
-                                        print('Simulation goes for: ' + str(100 * i / steps) + ' %' + ' It took: ' + str(elapsed_time[i-1]))
+            end_time = time.time()
+            elapsed_time[i] = end_time - start_time
+
+            i = i + 1
+            self.progressbar.set(i / scaling_steps)
+            print(
+                'Simulation goes for: ' + str(100 * i / scaling_steps) + ' %' + ' It took: ' + str(
+                    elapsed_time[i - 1]))
 
         print("Average Simulation took {:.2f} seconds to run.".format(np.average(elapsed_time)))
         data_scan = data_scan.astype('str')
