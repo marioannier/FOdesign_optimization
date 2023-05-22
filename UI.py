@@ -251,7 +251,11 @@ class App(customtkinter.CTk):
         a3_steps = steps_f[2]
         a3 = np.linspace(a3_lower, a3_upper, a3_steps)
 
-        a4 = values_f[3][0]
+        a4_lower = values_f[3][0]
+        a4_upper = values_f[3][1]
+        # Define the ranges for each parameter
+        a4_steps = steps_f[3]
+        a4 = np.linspace(a4_lower, a4_upper, a4_steps)
 
         n1 = None
         n1_dopant_lower = values_f[4][0]
@@ -288,7 +292,7 @@ class App(customtkinter.CTk):
         alpha = np.linspace(alpha_lower, alpha_upper, alpha_steps)
 
         # creating variable to store the result
-        steps = a1_steps * a2_steps * a3_steps * n1_dopant_steps * n2_dopant_steps * n3_dopant_steps * n4_dopant_steps * alpha_steps
+        steps = a1_steps * a2_steps * a3_steps * a4_steps * n1_dopant_steps * n2_dopant_steps * n3_dopant_steps * n4_dopant_steps * alpha_steps
         data_scan = np.zeros(
             (steps, 9 + 9))  # 9-> max output of fiber_profile.mode_data() and 9 -> number of fiber parameters
         i = 0
@@ -319,26 +323,27 @@ class App(customtkinter.CTk):
         for a1_val in a1:
             for a2_val in a2:
                 for a3_val in a3:
-                    for n1_dopant_val in n1_dopant:
-                        for n2_dopant_val in n2_dopant:
-                            for n3_dopant_val in n3_dopant:
-                                for n4_dopant_val in n4_dopant:
-                                    for alpha_val in alpha:
-                                        # running the simulation
-                                        start_time = time.time()
+                    for a4_val in a4:
+                        for n1_dopant_val in n1_dopant:
+                            for n2_dopant_val in n2_dopant:
+                                for n3_dopant_val in n3_dopant:
+                                    for n4_dopant_val in n4_dopant:
+                                        for alpha_val in alpha:
+                                            # running the simulation
+                                            start_time = time.time()
 
-                                        fiber_profile.update_profile(dev, a1_val, a2_val, a3_val, a4, n1_dopant_val,
-                                                                     n2_dopant_val, n3_dopant_val, n4_dopant_val,
-                                                                     fiber_p, alpha_val)
-                                        data_scan[i, 9:] = list(fiber_profile.mode_data(dev, param_Scan))
-                                        data_scan[i, 0:9] = [a1_val, a2_val, a3_val, a4, n1_dopant_val,
-                                                             n2_dopant_val, n3_dopant_val, n4_dopant_val,
-                                                             alpha_val]
-                                        end_time = time.time()
-                                        elapsed_time[i] = end_time - start_time
-                                        i = i + 1
-                                        self.progressbar.set(i / steps)
-                                        print('Simulation goes for: ' + str(100 * i / steps) + ' %' + ' It took: ' + str(elapsed_time[i-1]))
+                                            fiber_profile.update_profile(dev, a1_val, a2_val, a3_val, a4_val, n1_dopant_val,
+                                                                         n2_dopant_val, n3_dopant_val, n4_dopant_val,
+                                                                         fiber_p, alpha_val)
+                                            data_scan[i, 9:] = list(fiber_profile.mode_data(dev, param_Scan))
+                                            data_scan[i, 0:9] = [a1_val, a2_val, a3_val, a4_val, n1_dopant_val,
+                                                                 n2_dopant_val, n3_dopant_val, n4_dopant_val,
+                                                                 alpha_val]
+                                            end_time = time.time()
+                                            elapsed_time[i] = end_time - start_time
+                                            i = i + 1
+                                            self.progressbar.set(i / steps)
+                                            print('Simulation goes for: ' + str(100 * i / steps) + ' %' + ' It took: ' + str(elapsed_time[i-1]))
 
         print("Average Simulation took {:.2f} seconds to run.".format(np.average(elapsed_time)))
         data_scan = data_scan.astype('str')
