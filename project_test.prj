@@ -2,7 +2,7 @@ begin <pdApplicationInfo(1.1)>
   FIMMWAVE 7.4.0 // applicationname applicationversion
   2437 // licensenumber
   6.2 (64 bit) 16336.70 // windowsversion RAM_in_MB 
-  11/05/2023 10:06:50 // savedate(dd/mm/yyyy) savetime(hh:mm:ss)
+  22/05/2023 16:00:35 // savedate(dd/mm/yyyy) savetime(hh:mm:ss)
 end
 begin <fimmwave_prj(1.1)> "project_test"
   1 // include state files on save
@@ -14,10 +14,10 @@ begin <fimmwave_prj(1.1)> "project_test"
       1 
       begin <fwg_layers(1.2)>
         //w        nr       alpha    cfseg   cornerp 
-        5.325 GeO2-SiO2(0.05)            0      0 
-        3.302 SiO2(0.05)                 0      0 
-        4.633 F-SiO2_1(0)                0      0 
-        6 SiO2(0.05)                     0      0 
+        3.615615616 GeO2-SiO2(0.04)      1      0 
+        2.169369369 SiO2(0)              0      0 
+        3.099099099 F-SiO2_1(0)          0      0 
+        25 SiO2(0)                       0      0 
         METALWALL 0 
       end
     end
@@ -25,7 +25,7 @@ begin <fimmwave_prj(1.1)> "project_test"
       1 0 0 100 // autoRun <unused> minTEfrac maxTEfrac
       N(1e+50) N(-1e+50)  // evstart evend
       10 0 120 120  // maxNmodes molabOpt nx ny
-      1.55 0 RFDMFSVEC 0 0 V1 1000 0 110 1 2  // lambda hCurv solverID Hsymmetries Vsymmetries solverParms
+      1.55 0 RFDMFSVEC 0 0 V1 1000 0 10 1 2  // lambda hCurv solverID Hsymmetries Vsymmetries solverParms
     end
   end
   begin <fwguideNode(1.1)> "triangular"

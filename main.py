@@ -166,7 +166,7 @@ if want_to_calculate_lambda:
     steps = 10
 
     dev = "app.subnodes[1].subnodes[1]"
-    data = np.zeros((steps, 7 + 1))
+    data = np.zeros((steps, 9 + 1))
     data.astype('str')
 
     data = fiber_profile.scan_lambda(dev, lam_s, lam_e, steps)

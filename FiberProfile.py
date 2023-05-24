@@ -193,8 +193,8 @@ class FiberProfile:
     def mode_data(self, dev, param_Scan=None, mode='1'):
 
         if param_Scan is None:
-            param_Scan = {"beta": False, "neff": False, "a_eff": False, "alpha": False, "dispersion": True,
-                          "isLeaky": False, "neffg": False, "fillFac": False, "gammaE": False}
+            param_Scan = {"beta": True, "neff": True, "a_eff": True, "alpha": True, "dispersion": True,
+                          "isLeaky": True, "neffg": True, "fillFac": True, "gammaE": True}
         data = np.zeros(9)
 
         self.fimmap.Exec(dev + ".evlist.update(1)")
@@ -225,8 +225,8 @@ class FiberProfile:
     def scan_lambda(self, dev, lambda_s, lambda_e, steps, param_Scan=None):
 
         if param_Scan is None:
-            param_Scan = {"beta": False, "neff": False, "a_eff": False, "alpha": False, "dispersion": True,
-                          "isLeaky": False, "neffg": False, "fillFac": False, "gammaE": False}
+            param_Scan = {"beta": True, "neff": True, "a_eff": True, "alpha": True, "dispersion": True,
+                          "isLeaky": True, "neffg": True, "fillFac": True, "gammaE": True}
 
         data_scan = np.zeros((steps, 9 + 1))  # 9 because is the number of output parame
         data_scan = data_scan.astype('str')
