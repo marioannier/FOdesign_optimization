@@ -145,7 +145,7 @@ class MyFrameleft(customtkinter.CTkFrame):
             i = i + 1
 
 
-class MyFrameright(customtkinter.CTkFrame):
+class MyFrame2(customtkinter.CTkFrame):
     def __init__(self, master, title, values, choice):
         super().__init__(master)
         self.grid_columnconfigure(0, weight=1)
@@ -187,6 +187,34 @@ class MyFrameright(customtkinter.CTkFrame):
         A = 1
 
 
+class MyFrame3(customtkinter.CTkFrame):
+    def __init__(self, master, title):
+        super().__init__(master)
+        self.grid_columnconfigure(0, weight=1)
+        self.title = title
+        self.switch_vars = []
+
+        self.title = customtkinter.CTkLabel(self, text=self.title, fg_color="transparent", corner_radius=6)
+        self.title.grid(row=0, column=0, padx=(10, 10), pady=(30, 10))
+
+        switch_var1 = customtkinter.CTkSwitch(self, text="Light/Dark mode", command=self.mode, onvalue="on",
+                                              offvalue="off")
+        switch_var1.grid(row=1, column=0, padx=(10, 10), pady=(10, 10), sticky="w")
+        self.switch_vars.append(switch_var1)
+
+        switch_var2 = customtkinter.CTkSwitch(self, text="Graphic/Console mode", onvalue="on",
+                                              offvalue="off")
+        switch_var2.grid(row=2, column=0, padx=(10, 10), pady=(10, 10), sticky="w")
+        self.switch_vars.append(switch_var2)
+
+    def mode(self):
+        m = self.switch_vars[0].get()
+        if m == "on":
+            customtkinter.set_appearance_mode("dark")
+        else:
+            customtkinter.set_appearance_mode("light")
+
+
 class App(customtkinter.CTk):
     def __init__(self):
         super().__init__()
@@ -196,7 +224,7 @@ class App(customtkinter.CTk):
         values_output = ["beta", "neff", "a_eff", "alpha", "dispersion", "isLeaky", "neffg"]
 
         self.title("Scan")
-        self.geometry("900x500")
+        self.geometry("1200x500")
         self.grid_columnconfigure((0, 1), weight=1)
         self.grid_rowconfigure(0, weight=1)
 
@@ -204,8 +232,8 @@ class App(customtkinter.CTk):
         self.frame_left.grid(row=0, column=0, padx=10, pady=(10, 0), sticky="nsew")
 
         choice = "Step Index"
-        self.frame_right = MyFrameright(self, "Output", values_output, choice)
-        self.frame_right.grid(row=0, column=1, padx=10, pady=(10, 0), sticky="nsew")
+        self.frame_2 = MyFrame2(self, "Output", values_output, choice)
+        self.frame_2.grid(row=0, column=1, padx=10, pady=(10, 0), sticky="nsew")
 
         self.button = customtkinter.CTkButton(self, text="RUN", command=self.buttonRUN_callback)
         self.button.grid(row=3, column=1, padx=10, pady=10)
@@ -221,9 +249,11 @@ class App(customtkinter.CTk):
         self.progressbar.grid(row=3, column=0, padx=10, pady=(10, 0), sticky="e")
         self.progressbar.configure(height=15, corner_radius=4, progress_color='green')
 
+        self.frame_3 = MyFrame3(self, "Settings")
+        self.frame_3.grid(row=0, column=2, padx=10, pady=10, sticky="nsew")
+
     def buttonRUN_callback(self):
         # get the project directory (project)
-        start_time = time.time()
         global dev
         root = Tk()
         root.filename = filedialog.askopenfilename(title="Select file",
@@ -242,7 +272,7 @@ class App(customtkinter.CTk):
         values_f = np.array(values).astype(float)
         steps = self.frame_left.get_steps()
         steps_f = np.array(steps).astype(int)
-        fiber_p = self.frame_right.get_menu()
+        fiber_p = self.frame_2.get_menu()
 
         a1_lower = values_f[0][0]
         a1_upper = values_f[0][1]
@@ -343,7 +373,8 @@ class App(customtkinter.CTk):
                                             # running the simulation
                                             start_time = time.time()
 
-                                            fiber_profile.update_profile(dev, a1_val, a2_val, a3_val, a4_val, n1_dopant_val,
+                                            fiber_profile.update_profile(dev, a1_val, a2_val, a3_val, a4_val,
+                                                                         n1_dopant_val,
                                                                          n2_dopant_val, n3_dopant_val, n4_dopant_val,
                                                                          fiber_p, alpha_val)
                                             data_scan[i, 9:] = list(fiber_profile.mode_data(dev, param_Scan))
@@ -354,7 +385,8 @@ class App(customtkinter.CTk):
                                             elapsed_time[i] = end_time - start_time
                                             i = i + 1
                                             self.progressbar.set(i / steps)
-                                            print('Simulation goes for: ' + str(100 * i / steps) + ' %' + ' It took: ' + str(elapsed_time[i-1]))
+                                            print('Simulation goes for: ' + str(
+                                                100 * i / steps) + ' %' + ' It took: ' + str(elapsed_time[i - 1]))
 
         print("Average Simulation took {:.2f} seconds to run.".format(np.average(elapsed_time)))
         data_scan = data_scan.astype('str')
