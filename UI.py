@@ -7,6 +7,12 @@ import numpy as np
 import time
 
 
+# This file was created to run simulations in terms of finding the best dimension and dopant values for certain output
+# value (values_output = ["beta", "neff", "a_eff", "alpha", "dispersion", "isLeaky", "neffg"]). These values are storge
+# in a .csv file. The user can select the upper and lower value for each variable involved and how many incremental
+# steps to take. TDefault values were defined.
+
+
 class MyFrameleft(customtkinter.CTkFrame):
     def __init__(self, master, labels, values):
         super().__init__(master)
@@ -43,13 +49,14 @@ class MyFrameleft(customtkinter.CTkFrame):
             self.entriesPamUP.append(entry)
 
             # check boxes
-            checkbox = customtkinter.CTkCheckBox(self, text="", command=self.action_check)
+            checkbox = customtkinter.CTkCheckBox(self, text="", command=self.action_check, corner_radius=0)
             checkbox.grid(row=i + 1, column=3, padx=10, pady=(10, 0))
             self.checkboxes.append(checkbox)
 
             # number of steps
-            entry = customtkinter.CTkEntry(self, placeholder_text="1")
+            entry = customtkinter.CTkEntry(self, placeholder_text="1", fg_color=self.matte_red)
             entry.grid(row=i + 1, column=4, padx=(0, 30), pady=(10, 0), sticky="e")
+            entry.configure(state="disabled")
             self.entriesSteps.append(entry)
             entry.configure(width=40)
 
@@ -127,11 +134,13 @@ class MyFrameleft(customtkinter.CTkFrame):
 
     def action_check(self):
         i = 0
-        for entry in self.entriesPamUP:
+        for entry, steps in zip(self.entriesPamUP, self.entriesSteps):
             a = self.checkboxes[i].get()
             if a == 1:
+                steps.configure(state="normal", fg_color=self.matte_green)
                 entry.configure(state="normal", fg_color=self.matte_green)
             else:
+                steps.configure(state="disable", fg_color=self.matte_red)
                 entry.configure(state="disable", fg_color=self.matte_red)
             i = i + 1
 
@@ -147,12 +156,14 @@ class MyFrameright(customtkinter.CTkFrame):
         self.optionmenus = []
 
         self.title = customtkinter.CTkLabel(self, text=self.title, fg_color="transparent", corner_radius=6)
-        self.title.grid(row=0, column=2, padx=0, pady=(10, 0), sticky="w")
+        self.title.grid(row=0, column=1, padx=40, pady=(10, 0), sticky="w")
 
         for i, value in enumerate(self.values):
-            checkbox = customtkinter.CTkCheckBox(self, text="")
-            checkbox.grid(row=i + 1, column=2, padx=10, pady=(10, 0))
+            checkbox = customtkinter.CTkCheckBox(self, text="", corner_radius=0, onvalue="True", offvalue="False")
+            checkbox.grid(row=i + 1, column=1, padx=50, pady=(10, 0))
+            checkbox.select()
             self.checkboxes.append(checkbox)
+            checkbox.configure(state="disabled")
 
             # labels
             label = customtkinter.CTkLabel(self, text=value)
@@ -163,7 +174,7 @@ class MyFrameright(customtkinter.CTkFrame):
         label.grid(row=len(values) + 2, column=0, padx=10, pady=(10, 0))
 
         optionmenu = customtkinter.CTkOptionMenu(self, values=["Step Index", "Triangular", "Graded"])
-        optionmenu.grid(row=len(values) + 3, column=0, padx=10, pady=(10, 0), sticky="w")
+        optionmenu.grid(row=len(values) + 2, column=1, padx=0, pady=(10, 0), sticky="w")
         optionmenu.set(choice)
         self.optionmenus.append(optionmenu)
 

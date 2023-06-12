@@ -6,6 +6,10 @@ from tkinter import *
 import numpy as np
 import time
 
+# This code was made for testing the scalability of a code design. After selecting the dimensions of the base core
+# we perform simulations changing the parameters: a1, a2, a3.
+# the scaling factor changes btw 1 and max_scaling_factor (= 2) in scaling_steps = 1000 steps
+
 
 class MyFrameleft(customtkinter.CTkFrame):
     def __init__(self, master, labels, values):
@@ -17,11 +21,8 @@ class MyFrameleft(customtkinter.CTkFrame):
         self.matte_red = ('#FF6666', '#993333')
         self.matte_green = ('#66CC66', '#336633')
 
-        self.title = customtkinter.CTkLabel(self, text="xxxxxxxxxxxxxxx", fg_color="transparent", corner_radius=6)
-        self.title.grid(row=0, column=3, padx=0, pady=(10, 0), sticky="w")
-
-        self.title = customtkinter.CTkLabel(self, text="xxxxxxxxxxxxxxx", fg_color="transparent", corner_radius=6)
-        self.title.grid(row=0, column=4, padx=0, pady=(10, 0), sticky="w")
+        self.title = customtkinter.CTkLabel(self, text="Fill-in:  initial fiber core parameters", fg_color="transparent", corner_radius=6)
+        self.title.grid(row=0, column=1, padx=0, pady=(10, 0), sticky="w")
 
         for i, label in enumerate(self.labels):
             # label
@@ -30,7 +31,7 @@ class MyFrameleft(customtkinter.CTkFrame):
 
             # entries, lower value
             entry = customtkinter.CTkEntry(self, placeholder_text=str(self.values[i]), fg_color=self.matte_green)
-            entry.grid(row=i + 1, column=1, padx=10, pady=(10, 0))
+            entry.grid(row=i + 1, column=1, padx=(0,10), pady=(10, 0))
             self.entriesPamDW.append(entry)
 
     def get_entry(self):
@@ -76,12 +77,14 @@ class MyFrameright(customtkinter.CTkFrame):
         self.optionmenus = []
 
         self.title = customtkinter.CTkLabel(self, text=self.title, fg_color="transparent", corner_radius=6)
-        self.title.grid(row=0, column=2, padx=0, pady=(10, 0), sticky="w")
+        self.title.grid(row=0, column=1, padx=40, pady=(10, 0), sticky="w")
 
         for i, value in enumerate(self.values):
-            checkbox = customtkinter.CTkCheckBox(self, text="")
-            checkbox.grid(row=i + 1, column=2, padx=10, pady=(10, 0))
+            checkbox = customtkinter.CTkCheckBox(self, text="", corner_radius=0, onvalue="True", offvalue="False")
+            checkbox.grid(row=i + 1, column=1, padx=50, pady=(10, 0))
+            checkbox.select()
             self.checkboxes.append(checkbox)
+            checkbox.configure(state="disabled")
 
             # labels
             label = customtkinter.CTkLabel(self, text=value)
@@ -92,7 +95,7 @@ class MyFrameright(customtkinter.CTkFrame):
         label.grid(row=len(values) + 2, column=0, padx=10, pady=(10, 0))
 
         optionmenu = customtkinter.CTkOptionMenu(self, values=["Step Index", "Triangular", "Graded"])
-        optionmenu.grid(row=len(values) + 3, column=0, padx=10, pady=(10, 0), sticky="w")
+        optionmenu.grid(row=len(values) + 2, column=1, padx=0, pady=(10, 0), sticky="w")
         optionmenu.set(choice)
         self.optionmenus.append(optionmenu)
 
@@ -109,7 +112,7 @@ class App(customtkinter.CTk):
         values_input = [3, 2, 2.5, 15, 0.05, 0, 0, 0, 1]
         values_output = ["beta", "neff", "a_eff", "alpha", "dispersion", "isLeaky", "neffg"]
 
-        self.title("Scan")
+        self.title("Scaling core")
         self.geometry("900x500")
         self.grid_columnconfigure((0, 1), weight=1)
         self.grid_rowconfigure(0, weight=1)
