@@ -31,11 +31,11 @@ a1 = 5.05765765765765
 a2 = 1.44504504504504
 a3 = 1.8063063063063
 a4 = 10
-n1_dopant = 0.04
+n1_dopant = 0.1
 n2_dopant = 0
 n3_dopant = 0
 n4_dopant = 0
-alpha = 2.0
+alpha = 1.0
 
 fiber_profile.builder_profile(dev, a1, a2, a3, a4, n1_dopant, n2_dopant, n3_dopant, n4_dopant, core_type, alpha)
 

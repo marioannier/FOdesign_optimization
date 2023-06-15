@@ -47,7 +47,7 @@ class FiberProfile:
         # plt.show()
 
     def graded_dopa_gene(self, alpha, dopa_max, steps):
-        # dopa_max in number NOT percentage
+        # dopa_max in number NOT a percentage
 
         m = -dopa_max / (steps ** alpha)
         y = np.zeros(steps)
