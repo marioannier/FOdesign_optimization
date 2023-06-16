@@ -4,8 +4,9 @@ import matplotlib.pyplot as plt
 
 class fiber_profile_gen:
 
-    def __init__(self, profile_name):
-        self.profile_name = profile_name
+    def __init__(self):
+        # write initial values
+        pass
 
     def rc_refindex(self, a1, n1, n2, alpha, steps):
         # based on : https://doi.org/10.1016/j.yofte.2021.102777
@@ -18,6 +19,8 @@ class fiber_profile_gen:
         self.steps = steps
 
         x = np.arange(0, self.a1, self.a1 / self.steps)
+        # here I flip the matrix 'cause the output data is needed from higher to lower value
+        #x= np.flip(x)
         y = np.zeros(self.steps)
         perc = np.zeros(self.steps)
 
@@ -32,7 +35,7 @@ class fiber_profile_gen:
             else:
                 y[j] = self.n2
 
-            perc[j] = -6.68002672 * y[j] + 9.7460532
+            perc[j] = 6.6823 * y[j] - 9.6495
 
         plt.plot(x,perc)
         plt.xlabel('radius')
@@ -50,13 +53,15 @@ class fiber_profile_gen:
         self.alpha = alpha
         self.steps = steps
         x = np.arange(0, self.a1, self.a1 / self.steps)
+        # here I flip the matrix 'cause the output data is needed from higher to lower value
+        # x= np.flip(x)
         y = np.zeros(self.steps)
         perc = np.zeros(self.steps)
         delta = (self.n1**2-self.n2**2)/(2*self.n1**2)
 
         for j, r in zip(range(self.steps), x):
             y[j] = (self.n1 * np.sqrt(1-2*delta*(r/self.a1)**self.alpha))
-            perc[j] = -6.68002672*y[j] + 9.7460532
+            perc[j] = 6.6823 * y[j] - 9.6495
 
         plt.plot(x, perc)
         plt.xlabel('radius')
