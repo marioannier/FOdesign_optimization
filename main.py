@@ -1,5 +1,5 @@
 from pdPythonLib import *
-from core_constructor import *
+from fiber_design import *
 from tkinter import filedialog
 from tkinter import *
 

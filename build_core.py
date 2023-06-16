@@ -1,7 +1,7 @@
 # asociated to the file build_core.prj, un proyecto vacio
 
 from pdPythonLib import *
-from core_constructor import *
+from fiber_design import *
 from tkinter import filedialog
 from tkinter import *
 
@@ -22,7 +22,7 @@ fimmap.Exec("app.openproject(" + root.filename + ")")
 fiber_profile = CoreProfile(fimmap)
 
 data_base = 'refbase_2.mat'
-core_type = "Raised Cosine T"  # INSERT
+core_type = "Double-Clad SI"  # INSERT
 fiber_profile.add_moduleFWG(core_type, data_base)
 dev = "app.subnodes[1].subnodes[1]"
 
@@ -32,8 +32,8 @@ a2 = 2
 a3 = 2
 a4 = 20
 n1_dopant = 0.07
-n2_dopant = 0
-n3_dopant = 0
+n2_dopant = 0.05
+n3_dopant = 0.03
 n4_dopant = 0
 alpha = 1.0
 

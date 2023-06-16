@@ -27,22 +27,27 @@ class CoreProfile:
     def add_moduleFWG(self, type, data_base='refbase.mat'):
         match type:
             case "Step Index T":
-                name = 'step_index'
+                name = 'step_index_T'
+                self.fimmap.Exec('app.subnodes[1].addsubnode(fwguideNode,' + name + ')')
+                self.fimmap.Exec('app.subnodes[1].subnodes[1].setmaterbase("' + data_base + '")')
+
+            case "Double-Clad SI" | "Triple-Clad SI":
+                name = 'double_trip_clad_SI'
                 self.fimmap.Exec('app.subnodes[1].addsubnode(fwguideNode,' + name + ')')
                 self.fimmap.Exec('app.subnodes[1].subnodes[1].setmaterbase("' + data_base + '")')
 
             case "Triangular T":
-                name = 'triangular'
+                name = 'triangular_T'
                 self.fimmap.Exec('app.subnodes[1].addsubnode(fwguideNode,' + name + ')')
                 self.fimmap.Exec('app.subnodes[1].subnodes[1].setmaterbase("' + data_base + '")')
 
             case "Graded T":
-                name = 'graded'
+                name = 'graded_T'
                 self.fimmap.Exec('app.subnodes[1].addsubnode(fwguideNode,' + name + ')')
                 self.fimmap.Exec('app.subnodes[1].subnodes[1].setmaterbase("' + data_base + '")')
 
             case "Raised Cosine T":
-                name = 'rc'
+                name = 'rc_T'
                 self.fimmap.Exec('app.subnodes[1].addsubnode(fwguideNode,' + name + ')')
                 self.fimmap.Exec('app.subnodes[1].subnodes[1].setmaterbase("' + data_base + '")')
             case _:
@@ -66,6 +71,23 @@ class CoreProfile:
                 self.fimmap.Exec(dev + '.layers[1].setMAT(' + a1_material + ')')
                 self.fimmap.Exec(dev + '.layers[2].setMAT(' + a2_material + ')')
                 self.fimmap.Exec(dev + '.layers[3].setMAT(' + a3_material + ')')
+                self.fimmap.Exec(dev + '.layers[4].setMAT(' + a4_material + ')')
+
+                # modifying layer parameters (sizes) & setting dopant percentage
+                for numlayer in range(1, 5, 1):
+                    self.fimmap.Exec(dev + '.layers[' + str(numlayer) + '].size=' + str(sizes[numlayer - 1]))
+                    self.fimmap.Exec(dev + '.layers[' + str(numlayer) + '].mx=' + str(dop_perct[numlayer - 1]))
+                    if numlayer == 1:
+                        self.fimmap.Exec(dev + '.layers[' + str(numlayer) + '].cfseg=1')
+
+            case "Double-Clad SI" | "Triple-Clad SI":
+                # creating layers
+                self.fimmap.Exec(dev + ".insertlayer(3)")
+                self.fimmap.Exec(dev + ".insertlayer(4)")
+                # setting materials
+                self.fimmap.Exec(dev + '.layers[1].setMAT(' + a1_material + ')')
+                self.fimmap.Exec(dev + '.layers[2].setMAT(' + a1_material + ')')
+                self.fimmap.Exec(dev + '.layers[3].setMAT(' + a1_material + ')')
                 self.fimmap.Exec(dev + '.layers[4].setMAT(' + a4_material + ')')
 
                 # modifying layer parameters (sizes) & setting dopant percentage
@@ -147,6 +169,20 @@ class CoreProfile:
                     self.fimmap.Exec(dev + '.layers[' + str(numlayer) + '].size=' + str(sizes[numlayer - 1]))
                     self.fimmap.Exec(dev + '.layers[' + str(numlayer) + '].mx=' + str(dop_perct[numlayer - 1]))
                     if numlayer == 1:
+                        self.fimmap.Exec(dev + '.layers[' + str(numlayer) + '].cfseg=1')
+
+            case "Double-Clad SI" | "Triple-Clad SI":
+                # setting materials -> COMMENTED 'CAUSE WAS ALREADY SETTES
+                # self.fimmap.Exec(dev + '.layers[1].setMAT(' + a1_material + ')')
+                # self.fimmap.Exec(dev + '.layers[2].setMAT(' + a2_material + ')')
+                # self.fimmap.Exec(dev + '.layers[3].setMAT(' + a3_material + ')')
+                # self.fimmap.Exec(dev + '.layers[4].setMAT(' + a4_material + ')')
+
+                # modifying layer parameters (sizes) & setting dopant percentage
+                for numlayer in range(1, 5, 1):
+                    self.fimmap.Exec(dev + '.layers[' + str(numlayer) + '].size=' + str(sizes[numlayer - 1]))
+                    self.fimmap.Exec(dev + '.layers[' + str(numlayer) + '].mx=' + str(dop_perct[numlayer - 1]))
+                    if numlayer == 1 or numlayer == 2:
                         self.fimmap.Exec(dev + '.layers[' + str(numlayer) + '].cfseg=1')
 
             case "Triangular T" | "Graded T":

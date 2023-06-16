@@ -1,5 +1,5 @@
 from pdPythonLib import *
-from core_constructor import *
+from fiber_design import *
 import numpy as np
 import matplotlib.pyplot as plt
 import fimmwavelib as fimm
@@ -204,7 +204,7 @@ print("All done!")
 # plt.show()
 
 
-# TESTING CLASS core_constructor.py
+# TESTING CLASS fiber_design.py
 
 # varParam1 = "app.subnodes[1].subnodes[5]"  # module with variables
 # param1name = 'refractive index'
