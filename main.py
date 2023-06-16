@@ -1,5 +1,5 @@
 from pdPythonLib import *
-from FiberProfile import *
+from core_constructor import *
 from tkinter import filedialog
 from tkinter import *
 
@@ -21,7 +21,7 @@ fimmap.StartApp('C:\\Program Files\\PhotonD\\Fimmwave\\bin64\\fimmwave.exe', 510
 # Microwave\\Simulations_run\\FIMMWAVE_Python\\FOdesign_optimization\\Experiment_fibers.prj,"")';
 fimmap.Exec("app.openproject(" + root.filename + ")")
 
-fiber_profile = FiberProfile(fimmap)
+fiber_profile = CoreProfile(fimmap)
 
 Is_the_project_created = True
 if not Is_the_project_created:

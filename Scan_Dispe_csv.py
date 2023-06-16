@@ -1,5 +1,5 @@
 from pdPythonLib import *
-from FiberProfile import *
+from core_constructor import *
 import numpy as np
 import matplotlib.pyplot as plt
 import fimmwavelib as fimm
@@ -121,7 +121,7 @@ print("Scanning " + param1name + " and " + param2name + " and extracting dispers
 # module under test
 dev = "app.subnodes[1].subnodes[4]"
 # object is created
-fiber_profile = FiberProfile()
+fiber_profile = CoreProfile()
 
 # first loop for changing the refractive index
 for param1 in range(0, param1Steps + 1, 1):
@@ -204,7 +204,7 @@ print("All done!")
 # plt.show()
 
 
-# TESTING CLASS FiberProfile.py
+# TESTING CLASS core_constructor.py
 
 # varParam1 = "app.subnodes[1].subnodes[5]"  # module with variables
 # param1name = 'refractive index'

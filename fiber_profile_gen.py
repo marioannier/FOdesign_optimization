@@ -2,8 +2,7 @@ import numpy as np
 import matplotlib.pyplot as plt
 
 
-class fiber_profile_gen:
-
+class FiberProfileGen:
     def __init__(self):
         # write initial values
         pass

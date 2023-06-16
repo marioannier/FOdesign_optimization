@@ -3,48 +3,19 @@
 # parametros que necesita como alpha y que a su vez me cree una FWG con la carateriaticas deseadas
 
 from pdPythonLib import *
+from fiber_profile_gen import *
 import numpy as np
 import matplotlib.pyplot as plt
 import array
 
 
-class FiberProfile:
+class CoreProfile:
     def __init__(self, fimmap=object):
         # by default it generate a triangular a=1
         self.fimmap = fimmap
 
     def __set__(self, fimmap=object):
         self.fimmap = fimmap
-
-    def graded_refindex_gene(self, a1, n1, n2, alpha, steps):
-        self.a1 = a1
-        self.n1 = n1
-        self.n2 = n2
-        self.alpha = alpha
-        self.steps = steps
-        x = np.arange(0, self.a1, self.a1 / self.steps)
-        y = np.zeros(self.steps)
-
-        A = np.zeros((self.steps, 1))
-        B = A.astype('str')
-
-        g = self.a1 / self.steps
-
-        for j in range(self.steps):
-            y[j] = (6.67677 * self.n1 * (1 - 2 * ((self.n1 ** 2 - self.n2 ** 2) / (2 * self.n1 ** 2)) * (
-                    x[j] / self.a1) ** self.alpha) ** (
-                            1 / 2) - 9.64142)  # porcentaje j
-            B[j] = y[j]
-        return y
-        # np.savetxt('dop_perc_GeO2-SiO2.txt', B, delimiter='\t', fmt='%s')
-        # with open('dop_perc_GeO2-SiO2.txt') as f:
-        #    print(f.read())
-
-        # plt.plot(x, y)
-        # plt.xlabel('radius')
-        # plt.ylabel('dop_perc_GeO2-SiO2')
-        # plt.title('Graded index fiber')
-        # plt.show()
 
     def graded_dopa_gene(self, alpha, dopa_max, steps):
         # dopa_max in number NOT a percentage

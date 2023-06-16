@@ -1,7 +1,7 @@
 # asociated to the file 19cores.prj, un proyecto con los cores previamente diseñados
 
 from pdPythonLib import *
-from FiberProfile import *
+from core_constructor import *
 from tkinter import filedialog
 from tkinter import *
 
@@ -20,7 +20,7 @@ fimmap.StartApp('C:\\Program Files\\PhotonD\\Fimmwave\\bin64\\fimmwave.exe', 510
 # open the project
 fimmap.Exec("app.openproject(" + root.filename + ")")
 
-fiber_profile = FiberProfile(fimmap)
+fiber_profile = CoreProfile(fimmap)
 
 table_a1 = [3.316516517, 3.541141141, 3.861561562, 4.026726727, 4.208408408, 4.551951952, 4.305105105, 4.460660661,
             4.628828829, 4.796996997, 5.057657658, 3.615615616, 3.706706707, 3.874874875, 4.523023023, 6.656656657]
