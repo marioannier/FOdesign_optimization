@@ -173,7 +173,7 @@ class MyFrame2(customtkinter.CTkFrame):
         label = customtkinter.CTkLabel(self, text="Profile:")
         label.grid(row=len(values) + 2, column=0, padx=10, pady=(10, 0))
 
-        optionmenu = customtkinter.CTkOptionMenu(self, values=["Step Index", "Triangular", "Graded"])
+        optionmenu = customtkinter.CTkOptionMenu(self, values=["Step Index T", "Triangular T", "Graded T", "Raised Cosine T"])
         optionmenu.grid(row=len(values) + 2, column=1, padx=0, pady=(10, 0), sticky="w")
         optionmenu.set(choice)
         self.optionmenus.append(optionmenu)
@@ -345,15 +345,18 @@ class App(customtkinter.CTk):
              'alpha',
              "beta (Real)", "neff (Real)", "a_eff", "alpha", "dispersion", "isLeaky", "neffg", "fillFac", "gammaE"])
 
-        if fiber_p == 'Step Index':
+        if fiber_p == 'Step Index T':
             dev = "app.subnodes[1].subnodes[1]"
             one_sim = 13
-        if fiber_p == 'Triangular':
+        if fiber_p == 'Triangular T':
             dev = "app.subnodes[1].subnodes[2]"
             one_sim = 7
-        if fiber_p == 'Graded':
+        if fiber_p == 'Graded T':
             dev = "app.subnodes[1].subnodes[3]"
             one_sim = 7
+        if fiber_p == 'Raised Cosine T':
+            dev = "app.subnodes[1].subnodes[4]"
+            one_sim = 17
         time_sim = str(one_sim * steps) + ' seg = ' + str(np.around((one_sim * steps) / 60, decimals=5)) + ' min = ' \
                    + str(np.around((one_sim * steps) / 3600, decimals=3)) + ' h'
         elapsed_time = np.zeros(steps)

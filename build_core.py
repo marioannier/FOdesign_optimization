@@ -1,4 +1,4 @@
-# asociated to the file build_profile.prj, un proyecto vacio
+# asociated to the file build_core.prj, un proyecto vacio
 
 from pdPythonLib import *
 from core_constructor import *
@@ -22,16 +22,16 @@ fimmap.Exec("app.openproject(" + root.filename + ")")
 fiber_profile = CoreProfile(fimmap)
 
 data_base = 'refbase_2.mat'
-core_type = "Graded"  # INSERT
+core_type = "Raised Cosine T"  # INSERT
 fiber_profile.add_moduleFWG(core_type, data_base)
 dev = "app.subnodes[1].subnodes[1]"
 
 # INSERT
-a1 = 5.05765765765765
-a2 = 1.44504504504504
-a3 = 1.8063063063063
-a4 = 10
-n1_dopant = 0.1
+a1 = 5
+a2 = 2
+a3 = 2
+a4 = 20
+n1_dopant = 0.07
 n2_dopant = 0
 n3_dopant = 0
 n4_dopant = 0

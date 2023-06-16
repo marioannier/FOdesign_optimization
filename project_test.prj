@@ -2,7 +2,7 @@ begin <pdApplicationInfo(1.1)>
   FIMMWAVE 7.4.0 // applicationname applicationversion
   2437 // licensenumber
   6.2 (64 bit) 16336.70 // windowsversion RAM_in_MB 
-  22/05/2023 16:00:35 // savedate(dd/mm/yyyy) savetime(hh:mm:ss)
+  16/06/2023 12:43:17 // savedate(dd/mm/yyyy) savetime(hh:mm:ss)
 end
 begin <fimmwave_prj(1.1)> "project_test"
   1 // include state files on save
@@ -266,6 +266,126 @@ begin <fimmwave_prj(1.1)> "project_test"
       N(1e+50) N(-1e+50)  // evstart evend
       10 0 120 120  // maxNmodes molabOpt nx ny
       1.55 0 RFDMFSVEC 0 0 V1 1000 0 10 1 2  // lambda hCurv solverID Hsymmetries Vsymmetries solverParms
+    end
+  end
+  begin <fwguideNode(1.1)> "rc"
+    1 // include state files on save (ignored unless this is a root project node)
+    begin <fwg_wguide(3.0)>
+      "[PrjDir]\refbase_2.mat" -1000 
+      0               
+      1 
+      begin <fwg_layers(1.2)>
+        //w        nr       alpha    cfseg   cornerp 
+        0.05 GeO2-SiO2(0.04)             1      0 
+        0.05 GeO2-SiO2(0.04)             1      0 
+        0.05 GeO2-SiO2(0.04)             1      0 
+        0.05 GeO2-SiO2(0.0399)           1      0 
+        0.05 GeO2-SiO2(0.0398)           1      0 
+        0.05 GeO2-SiO2(0.0398)           1      0 
+        0.05 GeO2-SiO2(0.0396)           1      0 
+        0.05 GeO2-SiO2(0.0395)           1      0 
+        0.05 GeO2-SiO2(0.0394)           1      0 
+        0.05 GeO2-SiO2(0.0392)           1      0 
+        0.05 GeO2-SiO2(0.039)            1      0 
+        0.05 GeO2-SiO2(0.0388)           1      0 
+        0.05 GeO2-SiO2(0.0386)           1      0 
+        0.05 GeO2-SiO2(0.0384)           1      0 
+        0.05 GeO2-SiO2(0.0381)           1      0 
+        0.05 GeO2-SiO2(0.0378)           1      0 
+        0.05 GeO2-SiO2(0.0375)           1      0 
+        0.05 GeO2-SiO2(0.0372)           1      0 
+        0.05 GeO2-SiO2(0.0369)           1      0 
+        0.05 GeO2-SiO2(0.0365)           1      0 
+        0.05 GeO2-SiO2(0.0362)           1      0 
+        0.05 GeO2-SiO2(0.0358)           1      0 
+        0.05 GeO2-SiO2(0.0354)           1      0 
+        0.05 GeO2-SiO2(0.035)            1      0 
+        0.05 GeO2-SiO2(0.0346)           1      0 
+        0.05 GeO2-SiO2(0.0341)           1      0 
+        0.05 GeO2-SiO2(0.0337)           1      0 
+        0.05 GeO2-SiO2(0.0332)           1      0 
+        0.05 GeO2-SiO2(0.0327)           1      0 
+        0.05 GeO2-SiO2(0.0323)           1      0 
+        0.05 GeO2-SiO2(0.0318)           1      0 
+        0.05 GeO2-SiO2(0.0312)           1      0 
+        0.05 GeO2-SiO2(0.0307)           1      0 
+        0.05 GeO2-SiO2(0.0302)           1      0 
+        0.05 GeO2-SiO2(0.0296)           1      0 
+        0.05 GeO2-SiO2(0.0291)           1      0 
+        0.05 GeO2-SiO2(0.0285)           1      0 
+        0.05 GeO2-SiO2(0.0279)           1      0 
+        0.05 GeO2-SiO2(0.0274)           1      0 
+        0.05 GeO2-SiO2(0.0268)           1      0 
+        0.05 GeO2-SiO2(0.0262)           1      0 
+        0.05 GeO2-SiO2(0.0256)           1      0 
+        0.05 GeO2-SiO2(0.025)            1      0 
+        0.05 GeO2-SiO2(0.0244)           1      0 
+        0.05 GeO2-SiO2(0.0237)           1      0 
+        0.05 GeO2-SiO2(0.0231)           1      0 
+        0.05 GeO2-SiO2(0.0225)           1      0 
+        0.05 GeO2-SiO2(0.0219)           1      0 
+        0.05 GeO2-SiO2(0.0213)           1      0 
+        0.05 GeO2-SiO2(0.0206)           1      0 
+        0.05 GeO2-SiO2(0.02)             1      0 
+        0.05 GeO2-SiO2(0.0194)           1      0 
+        0.05 GeO2-SiO2(0.0187)           1      0 
+        0.05 GeO2-SiO2(0.0181)           1      0 
+        0.05 GeO2-SiO2(0.0175)           1      0 
+        0.05 GeO2-SiO2(0.0169)           1      0 
+        0.05 GeO2-SiO2(0.0163)           1      0 
+        0.05 GeO2-SiO2(0.0156)           1      0 
+        0.05 GeO2-SiO2(0.015)            1      0 
+        0.05 GeO2-SiO2(0.0144)           1      0 
+        0.05 GeO2-SiO2(0.0138)           1      0 
+        0.05 GeO2-SiO2(0.0132)           1      0 
+        0.05 GeO2-SiO2(0.0126)           1      0 
+        0.05 GeO2-SiO2(0.0121)           1      0 
+        0.05 GeO2-SiO2(0.0115)           1      0 
+        0.05 GeO2-SiO2(0.0109)           1      0 
+        0.05 GeO2-SiO2(0.0104)           1      0 
+        0.05 GeO2-SiO2(0.0098)           1      0 
+        0.05 GeO2-SiO2(0.0093)           1      0 
+        0.05 GeO2-SiO2(0.0088)           1      0 
+        0.05 GeO2-SiO2(0.0082)           1      0 
+        0.05 GeO2-SiO2(0.0077)           1      0 
+        0.05 GeO2-SiO2(0.0073)           1      0 
+        0.05 GeO2-SiO2(0.0068)           1      0 
+        0.05 GeO2-SiO2(0.0063)           1      0 
+        0.05 GeO2-SiO2(0.0059)           1      0 
+        0.05 GeO2-SiO2(0.0054)           1      0 
+        0.05 GeO2-SiO2(0.005)            1      0 
+        0.05 GeO2-SiO2(0.0046)           1      0 
+        0.05 GeO2-SiO2(0.0042)           1      0 
+        0.05 GeO2-SiO2(0.0038)           1      0 
+        0.05 GeO2-SiO2(0.0035)           1      0 
+        0.05 GeO2-SiO2(0.0031)           1      0 
+        0.05 GeO2-SiO2(0.0028)           1      0 
+        0.05 GeO2-SiO2(0.0025)           1      0 
+        0.05 GeO2-SiO2(0.0022)           1      0 
+        0.05 GeO2-SiO2(0.0019)           1      0 
+        0.05 GeO2-SiO2(0.0016)           1      0 
+        0.05 GeO2-SiO2(0.0014)           1      0 
+        0.05 GeO2-SiO2(0.0012)           1      0 
+        0.05 GeO2-SiO2(0.001)            1      0 
+        0.05 GeO2-SiO2(0.0008)           1      0 
+        0.05 GeO2-SiO2(0.0006)           1      0 
+        0.05 GeO2-SiO2(0.0005)           1      0 
+        0.05 GeO2-SiO2(0.0004)           1      0 
+        0.05 GeO2-SiO2(0.0002)           1      0 
+        0.05 GeO2-SiO2(0.0002)           1      0 
+        0.05 GeO2-SiO2(0.0001)           1      0 
+        0.05 GeO2-SiO2(0)                1      0 
+        2 SiO2(0)                        0      0 
+        2.5 F-SiO2_1(0)                  0      0 
+        15 SiO2(0)                       0      0 
+        METALWALL 0 
+      end
+    end
+    begin <molab_parms(1.3)>
+      1 0 0 100 // autoRun <unused> minTEfrac maxTEfrac
+      N(1e+50) N(-1e+50)  // evstart evend
+      10 0 60 60  // maxNmodes molabOpt nx ny
+      1.55 0 RGFSVEC 0 0 V1 0 0 1 1  // lambda hCurv solverID Hsymmetries Vsymmetries solverParms
     end
   end
 end

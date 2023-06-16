@@ -30,7 +30,7 @@ class FiberProfileGen:
                 y[j] = self.n2
 
             perc[j] = 6.6823 * y[j] - 9.6495
-        return perc
+        return perc.round(4)
 
     def graded_refindex(self, alpha, dopa_max, steps):
         # refractive index relation with GiO2-SiO2 percentage Percentage = -6.67677 * refractive_index + 9.64142
@@ -49,4 +49,4 @@ class FiberProfileGen:
             y[j] = (self.n1 * np.sqrt(1 - 2 * delta * (j / self.steps) ** self.alpha))
             perc[j] = 6.6823 * y[j] - 9.6495
 
-        return perc
+        return perc.round(4)

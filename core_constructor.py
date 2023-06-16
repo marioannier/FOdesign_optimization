@@ -26,18 +26,23 @@ class CoreProfile:
 
     def add_moduleFWG(self, type, data_base='refbase.mat'):
         match type:
-            case "Step Index":
+            case "Step Index T":
                 name = 'step_index'
                 self.fimmap.Exec('app.subnodes[1].addsubnode(fwguideNode,' + name + ')')
                 self.fimmap.Exec('app.subnodes[1].subnodes[1].setmaterbase("' + data_base + '")')
 
-            case "Triangular":
+            case "Triangular T":
                 name = 'triangular'
                 self.fimmap.Exec('app.subnodes[1].addsubnode(fwguideNode,' + name + ')')
                 self.fimmap.Exec('app.subnodes[1].subnodes[1].setmaterbase("' + data_base + '")')
 
-            case "Graded":
+            case "Graded T":
                 name = 'graded'
+                self.fimmap.Exec('app.subnodes[1].addsubnode(fwguideNode,' + name + ')')
+                self.fimmap.Exec('app.subnodes[1].subnodes[1].setmaterbase("' + data_base + '")')
+
+            case "Raised Cosine T":
+                name = 'rc'
                 self.fimmap.Exec('app.subnodes[1].addsubnode(fwguideNode,' + name + ')')
                 self.fimmap.Exec('app.subnodes[1].subnodes[1].setmaterbase("' + data_base + '")')
             case _:
@@ -53,7 +58,7 @@ class CoreProfile:
         a4_material = 'SiO2'
 
         match pro_type:
-            case "Step Index":
+            case "Step Index T":
                 # creating layers
                 self.fimmap.Exec(dev + ".insertlayer(3)")
                 self.fimmap.Exec(dev + ".insertlayer(4)")
@@ -70,7 +75,7 @@ class CoreProfile:
                     if numlayer == 1:
                         self.fimmap.Exec(dev + '.layers[' + str(numlayer) + '].cfseg=1')
 
-            case "Triangular" | "Graded":
+            case "Triangular T" | "Graded T":
                 n_steps = 100
                 # creating layers
                 self.fimmap.Exec(dev + ".insertlayer(3)")
@@ -81,6 +86,30 @@ class CoreProfile:
                 dop_perct_grad = fp.FiberProfileGen.graded_refindex(self, alpha, n1_dop, n_steps)
                 dop_perct.pop(0)
                 dop_perct = np.append(dop_perct_grad, dop_perct)
+
+                # loop to modify every layer
+                for numlayer in range(1, n_steps + 3, 1):
+                    if numlayer < n_steps:
+                        self.fimmap.Exec(dev + ".insertlayer(" + str(numlayer) + ")")
+                        self.fimmap.Exec(dev + '.layers[' + str(numlayer) + '].size=' + str(sizes[0] / n_steps))
+                        self.fimmap.Exec(dev + ".layers[" + str(numlayer) + "].setMAT(GeO2-SiO2)")
+                        self.fimmap.Exec(dev + ".layers[" + str(numlayer) + "].mx=" + str(dop_perct[numlayer - 1]))
+                        self.fimmap.Exec(dev + '.layers[' + str(numlayer) + '].cfseg=1')
+                    else:
+                        self.fimmap.Exec(dev + '.layers[' + str(numlayer) + '].size=' + str(sizes[numlayer - n_steps + 1]))
+                        self.fimmap.Exec(dev + '.layers[' + str(numlayer) + '].mx=' + str(dop_perct[numlayer]))
+
+            case "Raised Cosine T":
+                n_steps = 100
+                # creating layers
+                self.fimmap.Exec(dev + ".insertlayer(3)")
+                # setting materials I don't set the matrerial for layer 1 'cause is modify later
+                self.fimmap.Exec(dev + '.layers[1].setMAT(SiO2)')
+                self.fimmap.Exec(dev + '.layers[2].setMAT(F-SiO2_1)')
+                self.fimmap.Exec(dev + '.layers[3].setMAT(SiO2)')
+                dop_perct_rc = fp.FiberProfileGen.rc_refindex(self, alpha, n1_dop, n_steps)
+                dop_perct.pop(0)
+                dop_perct = np.append(dop_perct_rc, dop_perct)
 
                 # loop to modify every layer
                 for numlayer in range(1, n_steps + 3, 1):
@@ -106,7 +135,7 @@ class CoreProfile:
         a3_material = 'F-SiO2_1'
         a4_material = 'SiO2'
         match pro_type:
-            case "Step Index":
+            case "Step Index T":
                 # setting materials -> COMMENTED 'CAUSE WAS ALREADY SETTES
                 # self.fimmap.Exec(dev + '.layers[1].setMAT(' + a1_material + ')')
                 # self.fimmap.Exec(dev + '.layers[2].setMAT(' + a2_material + ')')
@@ -120,9 +149,25 @@ class CoreProfile:
                     if numlayer == 1:
                         self.fimmap.Exec(dev + '.layers[' + str(numlayer) + '].cfseg=1')
 
-            case "Triangular" | "Graded":
+            case "Triangular T" | "Graded T":
                 n_steps = 100
                 dop_perct_grad = fp.FiberProfileGen.graded_refindex(self,alpha, n1_dop, n_steps)
+                dop_perct.pop(0)
+                dop_perct = np.append(dop_perct_grad, dop_perct)
+
+                # loop to modify every layer
+                for numlayer in range(1, n_steps + 3, 1):
+                    if n_steps > numlayer:
+                        self.fimmap.Exec(dev + '.layers[' + str(numlayer) + '].size=' + str(sizes[0] / n_steps))
+                        self.fimmap.Exec(dev + ".layers[" + str(numlayer) + "].mx=" + str(dop_perct[numlayer - 1]))
+                        self.fimmap.Exec(dev + '.layers[' + str(numlayer) + '].cfseg=1')
+                    else:
+                        self.fimmap.Exec(dev + '.layers[' + str(numlayer) + '].size=' + str(sizes[numlayer - n_steps + 1]))
+                        self.fimmap.Exec(dev + '.layers[' + str(numlayer) + '].mx=' + str(dop_perct[numlayer]))
+
+            case "Raised Cosine T":
+                n_steps = 100
+                dop_perct_grad = fp.FiberProfileGen.rc_refindex(self,alpha, n1_dop, n_steps)
                 dop_perct.pop(0)
                 dop_perct = np.append(dop_perct_grad, dop_perct)
 
