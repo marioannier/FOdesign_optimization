@@ -3,7 +3,7 @@
 # parametros que necesita como alpha y que a su vez me cree una FWG con la carateriaticas deseadas
 
 from pdPythonLib import *
-from fiber_profile_gen import *
+import fiber_profile_gen as fp
 import numpy as np
 import matplotlib.pyplot as plt
 import array
@@ -16,17 +16,6 @@ class CoreProfile:
 
     def __set__(self, fimmap=object):
         self.fimmap = fimmap
-
-    def graded_dopa_gene(self, alpha, dopa_max, steps):
-        # dopa_max in number NOT a percentage
-
-        m = -dopa_max / (steps ** alpha)
-        y = np.zeros(steps)
-
-        for j in range(steps):
-            y[j] = (m * (j ** alpha) + dopa_max)
-
-        return y
 
     def add_project(self, name='fiber_test', dir='nodir'):
         self.fimmap.Exec('app.addsubnode(' + name + 'fimmwave_prj, "project_test")')
@@ -89,13 +78,7 @@ class CoreProfile:
                 self.fimmap.Exec(dev + '.layers[1].setMAT(SiO2)')
                 self.fimmap.Exec(dev + '.layers[2].setMAT(F-SiO2_1)')
                 self.fimmap.Exec(dev + '.layers[3].setMAT(SiO2)')
-                dop_perct_grad = self.graded_dopa_gene(alpha, n1_dop, n_steps)
-
-                # plotting to check
-                # x = np.arange(0, a1, a1 / n_steps)
-                # plt.plot(x, dop_perct_grad)
-                # plt.show()
-
+                dop_perct_grad = fp.FiberProfileGen.graded_refindex(self, alpha, n1_dop, n_steps)
                 dop_perct.pop(0)
                 dop_perct = np.append(dop_perct_grad, dop_perct)
 
@@ -139,14 +122,9 @@ class CoreProfile:
 
             case "Triangular" | "Graded":
                 n_steps = 100
-                dop_perct_grad = self.graded_dopa_gene(alpha, n1_dop, n_steps)
+                dop_perct_grad = fp.FiberProfileGen.graded_refindex(self,alpha, n1_dop, n_steps)
                 dop_perct.pop(0)
                 dop_perct = np.append(dop_perct_grad, dop_perct)
-
-                # plotting to check -> CHANGE TO PLOT DIFFERENT PARAMETERS THE PREVIOUS ONES AND THE FORMER
-                # x = np.arange(0, a1, a1 / n_steps)
-                # plt.plot(x, dop_perct_grad)
-                # plt.show()
 
                 # loop to modify every layer
                 for numlayer in range(1, n_steps + 3, 1):
