@@ -1,5 +1,5 @@
 import customtkinter
-from FiberProfile import *
+from fiber_design import *
 from tkinter import filedialog
 from tkinter import *
 
@@ -153,7 +153,7 @@ class App(customtkinter.CTk):
         fimmap.StartApp('C:\\Program Files\\PhotonD\\Fimmwave\\bin64\\fimmwave.exe', 5101)
         fimmap.Exec("app.openproject(" + root.filename + ")")
         # create the object
-        fiber_profile = FiberProfile(fimmap)
+        fiber_profile = CoreProfile(fimmap)
 
         values = self.frame_left.get_entry()
         values_f = np.array(values).astype(float)
