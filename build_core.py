@@ -22,7 +22,7 @@ fimmap.Exec("app.openproject(" + root.filename + ")")
 fiber_profile = CoreProfile(fimmap)
 
 data_base = 'refbase_2.mat'
-core_type = "Double-Clad SI"  # INSERT
+core_type = "Five Layers"  # INSERT
 fiber_profile.add_moduleFWG(core_type, data_base)
 dev = "app.subnodes[1].subnodes[1]"
 
@@ -30,11 +30,11 @@ dev = "app.subnodes[1].subnodes[1]"
 a1 = 5
 a2 = 2
 a3 = 2
-a4 = 20
+a4 = 2
 n1_dopant = 0.07
 n2_dopant = 0.05
 n3_dopant = 0.03
-n4_dopant = 0
+n4_dopant = 0.02
 alpha = 1.0
 
 fiber_profile.builder_profile(dev, a1, a2, a3, a4, n1_dopant, n2_dopant, n3_dopant, n4_dopant, core_type, alpha)

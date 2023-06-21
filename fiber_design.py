@@ -36,6 +36,11 @@ class CoreProfile:
                 self.fimmap.Exec('app.subnodes[1].addsubnode(fwguideNode,' + name + ')')
                 self.fimmap.Exec('app.subnodes[1].subnodes[1].setmaterbase("' + data_base + '")')
 
+            case "Five Layers":
+                name = 'five_layers'
+                self.fimmap.Exec('app.subnodes[1].addsubnode(fwguideNode,' + name + ')')
+                self.fimmap.Exec('app.subnodes[1].subnodes[1].setmaterbase("' + data_base + '")')
+
             case "Triangular T":
                 name = 'triangular_T'
                 self.fimmap.Exec('app.subnodes[1].addsubnode(fwguideNode,' + name + ')')
@@ -97,6 +102,35 @@ class CoreProfile:
                     if numlayer == 1:
                         self.fimmap.Exec(dev + '.layers[' + str(numlayer) + '].cfseg=1')
 
+            case "Five Layers":
+                a5 = 20
+                n5_dop = 0
+                dop_perct = np.append(dop_perct, n5_dop)
+                sizes = np.append(sizes, a5)
+
+                # dopant percent of SiO2
+                material1 = 'GeO2-SiO2'
+                material2 = 'SiO2'
+                material3 = 'F-SiO2_1'
+
+                # creating layers
+                self.fimmap.Exec(dev + ".insertlayer(3)")
+                self.fimmap.Exec(dev + ".insertlayer(4)")
+                self.fimmap.Exec(dev + ".insertlayer(5)")
+                # setting materials
+                self.fimmap.Exec(dev + '.layers[1].setMAT(' + material1 + ')')
+                self.fimmap.Exec(dev + '.layers[2].setMAT(' + material1 + ')')
+                self.fimmap.Exec(dev + '.layers[3].setMAT(' + material1 + ')')
+                self.fimmap.Exec(dev + '.layers[4].setMAT(' + material1 + ')')
+                self.fimmap.Exec(dev + '.layers[5].setMAT(' + material2 + ')')
+
+                # modifying layer parameters (sizes) & setting dopant percentage
+                for numlayer in range(1, 6, 1):
+                    self.fimmap.Exec(dev + '.layers[' + str(numlayer) + '].size=' + str(sizes[numlayer - 1]))
+                    self.fimmap.Exec(dev + '.layers[' + str(numlayer) + '].mx=' + str(dop_perct[numlayer - 1]))
+                    if numlayer == 1:
+                        self.fimmap.Exec(dev + '.layers[' + str(numlayer) + '].cfseg=1')
+
             case "Triangular T" | "Graded T":
                 n_steps = 100
                 # creating layers
@@ -118,7 +152,8 @@ class CoreProfile:
                         self.fimmap.Exec(dev + ".layers[" + str(numlayer) + "].mx=" + str(dop_perct[numlayer - 1]))
                         self.fimmap.Exec(dev + '.layers[' + str(numlayer) + '].cfseg=1')
                     else:
-                        self.fimmap.Exec(dev + '.layers[' + str(numlayer) + '].size=' + str(sizes[numlayer - n_steps + 1]))
+                        self.fimmap.Exec(
+                            dev + '.layers[' + str(numlayer) + '].size=' + str(sizes[numlayer - n_steps + 1]))
                         self.fimmap.Exec(dev + '.layers[' + str(numlayer) + '].mx=' + str(dop_perct[numlayer]))
 
             case "Raised Cosine T":
@@ -142,20 +177,21 @@ class CoreProfile:
                         self.fimmap.Exec(dev + ".layers[" + str(numlayer) + "].mx=" + str(dop_perct[numlayer - 1]))
                         self.fimmap.Exec(dev + '.layers[' + str(numlayer) + '].cfseg=1')
                     else:
-                        self.fimmap.Exec(dev + '.layers[' + str(numlayer) + '].size=' + str(sizes[numlayer - n_steps + 1]))
+                        self.fimmap.Exec(
+                            dev + '.layers[' + str(numlayer) + '].size=' + str(sizes[numlayer - n_steps + 1]))
                         self.fimmap.Exec(dev + '.layers[' + str(numlayer) + '].mx=' + str(dop_perct[numlayer]))
 
             case _:
                 raise EnvironmentError("type not specify or incorrect")
 
     def update_profile(self, dev, a1, a2, a3, a4, n1_dop, n2_dop, n3_dop, n4_dop, pro_type, alpha):
-        dop_perct = [n1_dop, n2_dop, n3_dop, n4_dop]
-        sizes = [a1, a2, a3, a4]
-        # dopant percent of SiO2
-        a1_material = 'GeO2-SiO2'
-        a2_material = 'SiO2'
-        a3_material = 'F-SiO2_1'
-        a4_material = 'SiO2'
+        # for five layers
+        a5 = 20
+        n5_dop = 0
+
+        dop_perct = [n1_dop, n2_dop, n3_dop, n4_dop, n5_dop]
+        sizes = [a1, a2, a3, a4, a5]
+
         match pro_type:
             case "Step Index T":
                 # setting materials -> COMMENTED 'CAUSE WAS ALREADY SETTES
@@ -172,11 +208,6 @@ class CoreProfile:
                         self.fimmap.Exec(dev + '.layers[' + str(numlayer) + '].cfseg=1')
 
             case "Double-Clad SI" | "Triple-Clad SI":
-                # setting materials -> COMMENTED 'CAUSE WAS ALREADY SETTES
-                # self.fimmap.Exec(dev + '.layers[1].setMAT(' + a1_material + ')')
-                # self.fimmap.Exec(dev + '.layers[2].setMAT(' + a2_material + ')')
-                # self.fimmap.Exec(dev + '.layers[3].setMAT(' + a3_material + ')')
-                # self.fimmap.Exec(dev + '.layers[4].setMAT(' + a4_material + ')')
 
                 # modifying layer parameters (sizes) & setting dopant percentage
                 for numlayer in range(1, 5, 1):
@@ -185,9 +216,18 @@ class CoreProfile:
                     if numlayer == 1 or numlayer == 2:
                         self.fimmap.Exec(dev + '.layers[' + str(numlayer) + '].cfseg=1')
 
+            case "Five Layers":
+
+                # modifying layer parameters (sizes) & setting dopant percentage
+                for numlayer in range(1, 6, 1):
+                    self.fimmap.Exec(dev + '.layers[' + str(numlayer) + '].size=' + str(sizes[numlayer - 1]))
+                    self.fimmap.Exec(dev + '.layers[' + str(numlayer) + '].mx=' + str(dop_perct[numlayer - 1]))
+                    if numlayer in [1, 2, 3]:
+                        self.fimmap.Exec(dev + '.layers[' + str(numlayer) + '].cfseg=1')
+
             case "Triangular T" | "Graded T":
                 n_steps = 100
-                dop_perct_grad = fp.FiberProfileGen.graded_refindex(self,alpha, n1_dop, n_steps)
+                dop_perct_grad = fp.FiberProfileGen.graded_refindex(self, alpha, n1_dop, n_steps)
                 dop_perct.pop(0)
                 dop_perct = np.append(dop_perct_grad, dop_perct)
 
@@ -198,12 +238,13 @@ class CoreProfile:
                         self.fimmap.Exec(dev + ".layers[" + str(numlayer) + "].mx=" + str(dop_perct[numlayer - 1]))
                         self.fimmap.Exec(dev + '.layers[' + str(numlayer) + '].cfseg=1')
                     else:
-                        self.fimmap.Exec(dev + '.layers[' + str(numlayer) + '].size=' + str(sizes[numlayer - n_steps + 1]))
+                        self.fimmap.Exec(
+                            dev + '.layers[' + str(numlayer) + '].size=' + str(sizes[numlayer - n_steps + 1]))
                         self.fimmap.Exec(dev + '.layers[' + str(numlayer) + '].mx=' + str(dop_perct[numlayer]))
 
             case "Raised Cosine T":
                 n_steps = 100
-                dop_perct_grad = fp.FiberProfileGen.rc_refindex(self,alpha, n1_dop, n_steps)
+                dop_perct_grad = fp.FiberProfileGen.rc_refindex(self, alpha, n1_dop, n_steps)
                 dop_perct.pop(0)
                 dop_perct = np.append(dop_perct_grad, dop_perct)
 
@@ -214,7 +255,8 @@ class CoreProfile:
                         self.fimmap.Exec(dev + ".layers[" + str(numlayer) + "].mx=" + str(dop_perct[numlayer - 1]))
                         self.fimmap.Exec(dev + '.layers[' + str(numlayer) + '].cfseg=1')
                     else:
-                        self.fimmap.Exec(dev + '.layers[' + str(numlayer) + '].size=' + str(sizes[numlayer - n_steps + 1]))
+                        self.fimmap.Exec(
+                            dev + '.layers[' + str(numlayer) + '].size=' + str(sizes[numlayer - n_steps + 1]))
                         self.fimmap.Exec(dev + '.layers[' + str(numlayer) + '].mx=' + str(dop_perct[numlayer]))
 
             case _:

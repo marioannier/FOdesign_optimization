@@ -173,7 +173,7 @@ class MyFrame2(customtkinter.CTkFrame):
         label = customtkinter.CTkLabel(self, text="Profile:")
         label.grid(row=len(values) + 2, column=0, padx=10, pady=(10, 0))
 
-        optionmenu = customtkinter.CTkOptionMenu(self, values=["Step Index T", "Double-Clad SI", "Triple-Clad SI", "Triangular T", "Graded T", "Raised Cosine T"])
+        optionmenu = customtkinter.CTkOptionMenu(self, values=["Step Index T", "Double-Clad SI", "Triple-Clad SI", "Five Layers" ,"Triangular T", "Graded T", "Raised Cosine T"])
         optionmenu.grid(row=len(values) + 2, column=1, padx=0, pady=(10, 0), sticky="w")
         optionmenu.set(choice)
         self.optionmenus.append(optionmenu)
@@ -351,14 +351,17 @@ class App(customtkinter.CTk):
         if fiber_p == 'Double-Clad SI' or 'Triple-Clad SI':
             dev = "app.subnodes[1].subnodes[2]"
             one_sim = 13
-        if fiber_p == 'Triangular T':
+        if fiber_p == 'Five Layers':
             dev = "app.subnodes[1].subnodes[3]"
-            one_sim = 7
-        if fiber_p == 'Graded T':
+            one_sim = 13
+        if fiber_p == 'Triangular T':
             dev = "app.subnodes[1].subnodes[4]"
             one_sim = 7
-        if fiber_p == 'Raised Cosine T':
+        if fiber_p == 'Graded T':
             dev = "app.subnodes[1].subnodes[5]"
+            one_sim = 7
+        if fiber_p == 'Raised Cosine T':
+            dev = "app.subnodes[1].subnodes[6]"
             one_sim = 17
         time_sim = str(one_sim * steps) + ' seg = ' + str(np.around((one_sim * steps) / 60, decimals=5)) + ' min = ' \
                    + str(np.around((one_sim * steps) / 3600, decimals=3)) + ' h'
