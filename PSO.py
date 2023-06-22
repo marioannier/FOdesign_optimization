@@ -10,22 +10,24 @@ def objective_function(a):
     # Unpack the variables
     a1, a2, a3, a4, dop1, dop2, dop3, dop4 = a
 
-    dev = "app.subnodes[1].subnodes[3]"
-    fiber_p = 'Five Layers'
-    alpha_val = 0
+    dev = "app.subnodes[1].subnodes[4]"
+    fiber_p = 'Triangular T'
+    alpha_val = 1
     fiber_profile.update_profile(dev, a1, a2, a3, a4, dop1, dop2, dop3, dop4, fiber_p, alpha_val)
     mode_data = fiber_profile.mode_data(dev)
 
     # Calculate the value to minimize (disp)
     disp = mode_data[4]  # Replace with the function that calculates disp
-    if disp < 10:
+    print(disp)
+    if disp < 0:
         disp = 100
 
     return disp
 
 
 # Define the bounds for each variable
-bounds = [(2, 6)] * 4 + [(0, 0.07)] * 4
+# bounds = [(4, 6)] * 4 + [(0, 0.07)] * 4
+bounds = [(4, 6)] * 3 + [(30, 30)] + [(0, 0.07)] + [(0, 0)] + [(0, 0)] + [(0, 0)]
 
 
 # Define the PSO algorithm
@@ -51,7 +53,7 @@ def pso(objective_func, bounds, num_particles, max_iterations):
         r1 = np.random.random(size=(num_particles, len(bounds)))
         r2 = np.random.random(size=(num_particles, len(bounds)))
 
-        velocities = velocities + 2.0 * r1 * (personal_best_positions - particles) + 2.0 * r2 * (
+        velocities = velocities + 1.0 * r1 * (personal_best_positions - particles) + 2.0 * r2 * (
                 global_best_position - particles)
         particles = particles + velocities
 
@@ -76,8 +78,8 @@ def pso(objective_func, bounds, num_particles, max_iterations):
 
 
 # Set the parameters for the PSO algorithm
-num_particles = 20
-max_iterations = 100
+num_particles = 10
+max_iterations = 10
 
 # getting the project directory
 root = Tk()
