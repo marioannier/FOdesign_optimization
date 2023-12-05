@@ -313,3 +313,4 @@ class CoreProfile:
             data_scan[i, 0] = str(lx)
 
         return data_scan
+

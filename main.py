@@ -7,6 +7,7 @@ import numpy as np
 import matplotlib.pyplot as plt
 import fimmwavelib as fimm
 
+
 # get the project directory (project) FALTA HACER UN IF PARA CREAR EL PROJECTO O ABRIR EL YA EXISTENTE
 root = Tk()
 root.filename = filedialog.askopenfilename(title="Select file",

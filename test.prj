@@ -1,0 +1,9 @@
+begin <pdApplicationInfo(1.1)>
+  FIMMWAVE 7.4.0 // applicationname applicationversion
+  2437 // licensenumber
+  6.2 (64 bit) 16336.70 // windowsversion RAM_in_MB 
+  05/12/2023 13:20:16 // savedate(dd/mm/yyyy) savetime(hh:mm:ss)
+end
+begin <fimmwave_prj(1.1)> "Fimmwave Project 1"
+  1 // include state files on save
+end
