@@ -5,7 +5,7 @@ import fiber_profile_gen as fp
 
 import numpy as np
 import fimmwavelib as fimm
-
+'''
 fimmap = pdApp()
 fimmap.StartApp('C:\\Program Files\\PhotonD\\Fimmwave\\bin64\\fimmwave.exe', 5101)
 
@@ -25,3 +25,4 @@ n_steps = 100
 fiber_profile.builder_profile(dev, sizes, dop_perct, profile_type, materials, alpha, n_steps)
 
 del fimmap
+'''
