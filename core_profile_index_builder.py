@@ -66,7 +66,7 @@ class ProfileIndexBuilder:
                         # working on
                         pass
 
-              # loop to modify every layer
+                # loop to modify every layer
                 for numlayer in range(1, n_steps, 1):
                     current_layer = last_layer + numlayer
                     self.fimmap.Exec(dev + '.insertlayer(' + str(current_layer) + ')')
@@ -83,6 +83,11 @@ class ProfileIndexBuilder:
         # return a float with the number of layers
         num_layers = self.fimmap.Exec(dev + '.nlayers()')
         return num_layers
+
+    def set_material_db(self, db_dir, db_name='refbase_2.mat'):
+        dev = 'app.subnodes[1].subnodes[1]'  # the device is one because I am going to have only one core type per project
+        data_base_data = db_dir + '\\' + db_name
+        self.fimmap.Exec(dev + '.setmaterbase(' + data_base_data + ')')
 
     def rc_refindex(self, alpha, dopa_max, steps):
         # based on : https://doi.org/10.1016/j.yofte.2021.102777
@@ -123,8 +128,6 @@ class ProfileIndexBuilder:
         return perc.round(4)
 
 
-
-
 if __name__ == "__main__":
     from fiber_design import *
     from core_profile_index_builder import *
@@ -138,11 +141,11 @@ if __name__ == "__main__":
     fiber_profile.add_moduleFWG('Module 1')
 
     dev = "app.subnodes[1].subnodes[1]"
-    sizes = [5, 2, 3,4,19]
-    dop_perct = [0.5, 0, 0.2, 0.8,0]
+    sizes = [5, 2, 3, 4, 19]
+    dop_perct = [0.5, 0, 0.2, 0.8, 0]
     profile_type = ['Contant', 'Contant', 'Contant', 'Contant', 'Contant']
-    materials = ['GeO2-SiO2','GeO2-SiO2','GeO2-SiO2','GeO2-SiO2', 'GeO2-SiO2']
-    alpha = [2, 0, 1, 0 ,0 ]
+    materials = ['GeO2-SiO2', 'GeO2-SiO2', 'GeO2-SiO2', 'GeO2-SiO2', 'GeO2-SiO2']
+    alpha = [2, 0, 1, 0, 0]
     n_steps = 100
 
     fiber_profile.builder_profile(dev, sizes, dop_perct, profile_type, materials, alpha, n_steps)

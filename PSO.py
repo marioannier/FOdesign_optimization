@@ -4,6 +4,7 @@ from tkinter import *
 from tkinter import filedialog
 import fimmwavelib as fimm
 
+# clase antigua
 
 # Define the objective function
 def objective_function(a):
