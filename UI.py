@@ -1,3 +1,5 @@
+from tkinter import filedialog
+
 import customtkinter
 from fiber_design import *
 from tkinter import *

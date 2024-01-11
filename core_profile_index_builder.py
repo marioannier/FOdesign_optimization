@@ -3,6 +3,7 @@ import numpy as np
 import fiber_profile_gen as fp
 
 
+
 class ProfileIndexBuilder:
     def __init__(self, fimmap=object):
         self.fimmap = fimmap
@@ -12,28 +13,29 @@ class ProfileIndexBuilder:
             raise FileNotFoundError(f"Directory '{direc}' does not exist.")
 
         self.fimmap.Exec('app.addsubnode(fimmwave_prj,' + name + ')')
-        self.fimmap.Exec('app.subnodes[1].savetofile(' + direc + ')')
+        # self.fimmap.Exec('app.subnodes[1].savetofile()')
 
     def add_moduleFWG(self, name='FWG Waveguide 1', data_base='refbase_2.mat'):
         self.fimmap.Exec('app.subnodes[1].addsubnode(fwguideNode,' + name + ')')
         self.fimmap.Exec('app.subnodes[1].subnodes[1].setmaterbase("' + data_base + '")')
 
-    def builder_profile(self, dev, sizes, dop_perct, profile_type, materials, alpha, n_steps=100):
-
+    def delete_layers(self):
+        dev = 'app.subnodes[1].subnodes[1]'  # the device is one because I am going to have only one core type per project
         # obtain the total number of layers
         num_layers = self.obtain_num_layer(dev)
-
         # Deleting all but first layer
         while num_layers > 1:
             self.fimmap.Exec(dev + ".deletelayer(" + str(num_layers) + ")")
             num_layers = self.obtain_num_layer(dev)
+
+    def builder_profile(self, dev, sizes, dop_perct, profile_type, materials, alpha, n_steps=100):
 
         for i, type_regions in enumerate(profile_type):
             # obtain the total number of layers
             last_layer = self.obtain_num_layer(dev)
 
             # creating the constant profile index layers
-            if type_regions == 'Contant':
+            if type_regions == 'Constant':
                 if last_layer == 1 and i == 0:
                     # rewriting the first layer
                     current_layer = last_layer
@@ -50,19 +52,19 @@ class ProfileIndexBuilder:
 
             # creating the non-constant layers
             else:
-                if "F-SiO2" in materials[i]:
+                if 'F-SiO2' in materials[i]:
                     raise EnvironmentError("cannot be construct variable index profile with F-SiO2 at 1 or 2 %")
 
                 match type_regions:
                     # Triangular or Graded
-                    case "Linear" | "Graded":
+                    case 'Linear' | 'Graded':
                         dop_perct_var = self.graded_refindex(alpha[i], dop_perct[i], n_steps)
 
                     # Raised cosine
-                    case "Raised cosine":
+                    case 'Raised cosine':
                         dop_perct_var = self.rc_refindex(alpha[i], dop_perct[i], n_steps)
 
-                    case "Custome function":
+                    case 'Custom function':
                         # working on
                         pass
 
@@ -78,6 +80,50 @@ class ProfileIndexBuilder:
                 if last_layer == 1 and i == 0:
                     # eliminating the first layer, it is the default
                     self.fimmap.Exec(dev + ".deletelayer(1)")
+
+    def update_profile(self, dev, sizes, dop_perct, profile_type, materials, alpha, n_steps=100):
+
+        actual_layer = 0
+
+        for i, type_regions in enumerate(profile_type):
+            # creating the constant profile index layers
+            if type_regions == 'Constant':
+                actual_layer = (n_steps-1) + i # I need to substract 1 because I eliminated the fisrt layer when building profile
+                self.fimmap.Exec(dev + '.layers[' + str(actual_layer) + '].size=' + str(sizes[i]))
+
+                # for these cases, the dopant percentage is irrelevant
+                if "F-SiO2" not in materials[i]:
+                    self.fimmap.Exec(dev + '.layers[' + str(actual_layer) + '].mx=' + str(dop_perct[i]))
+
+            # creating the non-constant layers
+            else:
+                if 'F-SiO2' in materials[i]:
+                    raise EnvironmentError("cannot be construct variable index profile with F-SiO2 at 1 or 2 %")
+
+                match type_regions:
+                    # Triangular or Graded
+                    case 'Linear' | 'Graded':
+                        dop_perct_var = self.graded_refindex(alpha[i], dop_perct[i], n_steps)
+
+                    # Raised cosine
+                    case 'Raised cosine':
+                        dop_perct_var = self.rc_refindex(alpha[i], dop_perct[i], n_steps)
+
+                    case 'Custom function':
+                        # working on
+                        pass
+
+                # loop to modify every layer
+                for numlayer in range(1, n_steps, 1):
+                    current_layer = actual_layer + numlayer
+                    self.fimmap.Exec(dev + '.layers[' + str(current_layer) + '].size=' + str(sizes[i] / n_steps))
+                    self.fimmap.Exec(dev + ".layers[" + str(current_layer) + "].mx=" + str(dop_perct_var[numlayer - 1]))
+                    if i == 0:
+                        self.fimmap.Exec(dev + '.layers[' + str(current_layer) + '].cfseg=1')
+                '''if last_layer == 1 and i == 0:
+                    # eliminating the first layer, it is the default
+                    self.fimmap.Exec(dev + ".deletelayer(1)")'''
+                actual_layer = actual_layer + 1
 
     def obtain_num_layer(self, dev):
         # return a float with the number of layers
