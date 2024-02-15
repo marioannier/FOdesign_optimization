@@ -62,7 +62,7 @@ begin <fimmwave_prj(1.1)> "project_test"
         2 GeO2-SiO2(0.05)                0      0 
         2 GeO2-SiO2(0.03)                0      0 
         2 GeO2-SiO2(0.02)                0      0 
-        20 SiO2(0)                       0      0 
+        50 SiO2(0)                       0      0 
         METALWALL 0 
       end
     end

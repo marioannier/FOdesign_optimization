@@ -2,8 +2,6 @@ import os
 import numpy as np
 import fiber_profile_gen as fp
 
-
-
 class ProfileIndexBuilder:
     def __init__(self, fimmap=object):
         self.fimmap = fimmap
@@ -31,6 +29,8 @@ class ProfileIndexBuilder:
     def builder_profile(self, dev, sizes, dop_perct, profile_type, materials, alpha, n_steps=100):
 
         for i, type_regions in enumerate(profile_type):
+            # to assure the dopant percentage is always positive
+            dop_perct[i] = abs(dop_perct[i])
             # obtain the total number of layers
             last_layer = self.obtain_num_layer(dev)
 
@@ -84,11 +84,13 @@ class ProfileIndexBuilder:
     def update_profile(self, dev, sizes, dop_perct, profile_type, materials, alpha, n_steps=100):
 
         actual_layer = 0
-
         for i, type_regions in enumerate(profile_type):
+            # to assure the dopant percentage is always positive
+            dop_perct[i]=abs(dop_perct[i])
             # creating the constant profile index layers
             if type_regions == 'Constant':
-                actual_layer = (n_steps-1) + i # I need to substract 1 because I eliminated the fisrt layer when building profile
+                actual_layer = (n_steps-1) + i # I need to substract 1 because I eliminated the first layer when
+                # building profile
                 self.fimmap.Exec(dev + '.layers[' + str(actual_layer) + '].size=' + str(sizes[i]))
 
                 # for these cases, the dopant percentage is irrelevant
@@ -135,6 +137,10 @@ class ProfileIndexBuilder:
         data_base_data = db_dir + '\\' + db_name
         self.fimmap.Exec(dev + '.setmaterbase(' + data_base_data + ')')
 
+    def set_wavelength(self, dev, wavelength):
+        self.fimmap.Exec(dev + ".evlist.svp.lambda=" + str(wavelength))
+
+
     def rc_refindex(self, alpha, dopa_max, steps):
         # based on : https://doi.org/10.1016/j.yofte.2021.102777
         # Multicore raised cosine fibers for next generation space division multiplexing systems
@@ -174,26 +180,3 @@ class ProfileIndexBuilder:
         return perc.round(4)
 
 
-if __name__ == "__main__":
-    from fiber_design import *
-    from core_profile_index_builder import *
-
-    fimmap = pdApp()
-    fimmap.StartApp('C:\\Program Files\\PhotonD\\Fimmwave\\bin64\\fimmwave.exe', 5101)
-
-    test_dir = 'D:\\OneDrive UPV\\OneDrive - UPV\PhD-m\\2023-2024\\FiberDesin_PhotonD\\FOdesign_optimization'
-    fiber_profile = ProfileIndexBuilder(fimmap)
-    fiber_profile.create_fimm_project('test2', test_dir)
-    fiber_profile.add_moduleFWG('Module 1')
-
-    dev = "app.subnodes[1].subnodes[1]"
-    sizes = [5, 2, 3, 4, 19]
-    dop_perct = [0.5, 0, 0.2, 0.8, 0]
-    profile_type = ['Contant', 'Contant', 'Contant', 'Contant', 'Contant']
-    materials = ['GeO2-SiO2', 'GeO2-SiO2', 'GeO2-SiO2', 'GeO2-SiO2', 'GeO2-SiO2']
-    alpha = [2, 0, 1, 0, 0]
-    n_steps = 100
-
-    fiber_profile.builder_profile(dev, sizes, dop_perct, profile_type, materials, alpha, n_steps)
-
-    del fimmap

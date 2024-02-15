@@ -82,27 +82,4 @@ class SimulationRun:
 
         return data
 
-    def scan_lambda(self, lambda_s, lambda_e, steps, param_Scan={"beta": True, "neff": True, "a_eff": True, "alpha": True, "dispersion": True,
-                                   "isLeaky": True, "neffg": True, "fillFac": True, "gammaE": True}):
 
-        dev = 'app.subnodes[1].subnodes[1]' # the device is one because I am going to have only one core type per project
-        num_true_values = list(param_Scan.values()).count(True)  # determine the lenght of the parametres to save
-
-        data_scan = np.zeros((steps, num_true_values + 1))  # CHANGE THIS TO OBTAIN ONLY THE NUM OF param_Scan == TRUE # 9 because is the number of output parame + the lambda
-        data_scan = data_scan.astype('str')
-
-        print("Scanning lambda and extracting: " + ", ".join([key for key, val in param_Scan.items() if val]))
-
-        for i in range(0, steps, 1):
-            lx = lambda_s + (float(i) / steps) * (lambda_e - lambda_s)
-            print("Solving Modes at " + str(lx))
-            self.fimmap.Exec(dev + ".evlist.svp.lambda=" + str(lx))
-            data_scan[i, 1:] = list(self.simulate(dev, param_Scan))
-            data_scan[i, 0] = str(lx)
-
-        return data_scan
-
-
-if __name__ == "__main__":
-    from fiber_design import *
-    from core_profile_index_builder import *

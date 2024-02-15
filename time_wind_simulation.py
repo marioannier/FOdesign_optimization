@@ -18,7 +18,7 @@ class SimulationTimeWind:
             case 'raised cosine':
                 case_time = 35
 
-        minutes = case_time * steps / 60
+        hours = case_time * steps / 3600
 
         window = tk.Tk()
         window.title("Simulation Confirmation")
@@ -32,7 +32,7 @@ class SimulationTimeWind:
         y_coordinate = (screen_height - window_height) // 2
         window.geometry(f"{window_width}x{window_height}+{x_coordinate}+{y_coordinate}")
 
-        message = f"The simulation will take {minutes.__round__(2)} minutes. Do you want to continue?"
+        message = f"The simulation will take {hours.__round__(2)} hours. Do you want to continue?"
 
         label = tk.Label(window, text=message, wraplength=250, justify='center', font=('Helvetica', 12))
         label.pack(padx=10, pady=10)
