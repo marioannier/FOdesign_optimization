@@ -3,7 +3,10 @@
 # parametros que necesita como alpha y que a su vez me cree una FWG con la carateriaticas deseadas
 
 from pdPythonLib import *
+from core_profile_index_builder import *
+
 import fiber_profile_gen as fp
+
 import numpy as np
 import matplotlib.pyplot as plt
 import array
@@ -165,7 +168,7 @@ class CoreProfile:
                 self.fimmap.Exec(dev + '.layers[2].setMAT(F-SiO2_1)')
                 self.fimmap.Exec(dev + '.layers[3].setMAT(SiO2)')
                 dop_perct_rc = fp.FiberProfileGen.rc_refindex(self, alpha, n1_dop, n_steps)
-                dop_perct.pop(0)
+                dop_perct.pop(0) # I substitute the first layer for a group of variable values dop_perct_
                 dop_perct = np.append(dop_perct_rc, dop_perct)
 
                 # loop to modify every layer
@@ -313,3 +316,4 @@ class CoreProfile:
             data_scan[i, 0] = str(lx)
 
         return data_scan
+
