@@ -17,6 +17,30 @@ from core_type import FiberParameters
 import matplotlib.pyplot as plt
 from mpl_toolkits.mplot3d import Axes3D
 import mplcursors
+from deap.tools import Statistics
+import pickle
+
+
+def exponential_penalty_function(x, x_optimal, alpha=0.1, lambda_param=0.5):
+    """
+    Compute the Exponential Penalty Function.
+
+    Parameters:
+    - x: Current solution vector.
+    - x_optimal: Optimal solution vector.
+    - alpha: Exponential rate parameter.
+    - lambda_param: Penalty strength parameter.
+
+    Returns:
+    - penalty: Penalty value based on the exponential penalty function.
+    """
+    # Calculate the Euclidean norm (distance) between the current solution and the optimal solution
+    deviation = np.linalg.norm(x - x_optimal)
+
+    # Compute the penalty using the exponential penalty function formula
+    penalty = lambda_param * np.exp(alpha * deviation)
+    return penalty
+
 
 def objective_function_dispersion(parameters):
     # Initial parameters
@@ -47,12 +71,12 @@ def objective_function_dispersion(parameters):
     disp = data_mode1[4]
     isleakyMode2 = data_mode3[5]
     # to avoid negative values, change later fot the finesse function
-    if disp < 0 or disp > 30:
-        disp = 100
+    if disp < 12 or disp > 30:
+        disp = exponential_penalty_function(disp, 12)
     if isleakyMode2 == 2:
         disp = 100
-    print("Dispersion: ", disp)
     return disp
+
 
 def objective_function_slope(parameters):
     # Initial parameters
@@ -73,7 +97,7 @@ def objective_function_slope(parameters):
     fiber_profile.update_profile(dev, sizes, dop_perct, profile_type,
                                  materials, alphas, n_steps)
     # these variables define the number of steps in terms of scaling factor
-    number_steps = 7 # la razon de cambio es de 2 nm de cambio
+    number_steps = 7  # la razon de cambio es de 2 nm de cambio
     param_Name = ["lambda"]
     lam_s = 1.53
     lam_e = 1.56
@@ -92,18 +116,19 @@ def objective_function_slope(parameters):
         # running simulation
         data_mode1[i, :] = experiment.simulate(param_Scan, mode='1')
 
-    #setting again to 1.55
+    # setting again to 1.55
     wavelength = 1.55
     fiber_profile.set_wavelength(dev, wavelength)
 
     # Calculate the derivative of dispersion with respect to wavelength
     slope = np.diff(data_mode1[:, 4]) / np.diff(steps * 1000)  # transform the wavelength to nm
 
-    output = np.abs(np.average(slope))
-    if output == 0:
-        output = 10
-    print("Slope: ", output)
-    return output
+    slope_ave = np.average(slope)
+    if slope_ave < 0.05:
+        slope_ave = exponential_penalty_function(slope_ave, 0.05)
+    return np.abs(slope_ave)
+
+
 def objective_function_err_fab(parameters):
     # Unpack the variables
     # initial parameters
@@ -128,26 +153,27 @@ def objective_function_err_fab(parameters):
     # scaling variable (COMENTAR PARA ENTENDER)
     scaling_steps = 3
     err_max = 0.1
-    rep_factor_scala = err_max/a1 #Traduccion de 0.3um de error a factor de escala pero solo para determinar la dispersion
-    steps = np.linspace(1-rep_factor_scala, 1+rep_factor_scala, scaling_steps)
+    rep_factor_scala = err_max / a1  # Traduccion de 0.3um de error a factor de escala pero solo para determinar la dispersion
+    steps = np.linspace(1 - rep_factor_scala, 1 + rep_factor_scala, scaling_steps)
     data_mode1 = np.zeros((scaling_steps, 9))
     # aqui se determina la dispersion para cada fcator de escala desde -0.3um to 0.3um de error
     for i, sca_fact in enumerate(steps):
-        sizes[0] = a1*sca_fact
+        sizes[0] = a1 * sca_fact
         fiber_profile.update_profile(dev, sizes, dop_perct, profile_type, materials, alphas, n_steps)
         # running simulation
         data_mode1[i, :] = experiment.simulate(param_Scan, mode='1')
 
     # Calculate the derivative of dispersion with respect to wavelength
-    scaling_intervals = 2*err_max/(scaling_steps-1)
-    fac = 0.1/scaling_intervals# to convert to 0.1um
-    diff_err_fab = fac * np.diff(data_mode1[:, 4])   # nm interval, i dont divide by 0.1 beacuse is include in the fac formula
+    scaling_intervals = 2 * err_max / (scaling_steps - 1)
+    fac = 0.1 / scaling_intervals  # to convert to 0.1um
+    diff_err_fab = fac * np.diff(
+        data_mode1[:, 4])  # nm interval, i don't divide by 0.1 beacuse is include in the fac formula
 
     output = np.abs(np.average(diff_err_fab))
     if output == 0:
-        output = 10
-    print("dD/dF_0.1um: ", output)
+        output = 100
     return output
+
 
 def evaluate(individual):
     # Call the objective_function with the individual's parameters
@@ -170,8 +196,6 @@ def initIndividual(icls, content, ccls, constraints):
     part = icls(content)
     for i, (min_value, max_value) in enumerate(constraints):
         part[i] = random.uniform(min_value, max_value)
-
-    print('part: ', part)
     return part
 
 
@@ -205,8 +229,6 @@ def custom_mutGaussian_constraints(individual, mu, sigma, indpb, constraints):
         if random.random() < indpb:
             mutated_value = individual[i] + random.gauss(m, s)
             individual[i] = max(min(mutated_value, max_value), min_value)
-    print('ind: ', individual)
-
     return individual
 
 
@@ -227,7 +249,7 @@ fimmap.StartApp('C:\\Program Files\\PhotonD\\Fimmwave\\bin64\\fimmwave.exe', 510
 
 # MODIFY DEPENDING ON PLACE OF WORKING
 # from work
-#test_dir = 'D:\\OneDrive UPV\\OneDrive - UPV\PhD-m\\2023-2024\\FiberDesin_PhotonD\\FOdesign_optimization'
+# test_dir = 'D:\\OneDrive UPV\\OneDrive - UPV\PhD-m\\2023-2024\\FiberDesin_PhotonD\\FOdesign_optimization'
 # from personal computer
 test_dir = 'C:\\Users\\Mario\\OneDrive - UPV\PhD-m\\2023-2024\\FiberDesin_PhotonD\\FOdesign_optimization'
 
@@ -249,22 +271,22 @@ sizes, dop_perct, profile_type, materials, alphas, n_steps, dev = (
 )
 
 fiber_profile.delete_layers()
-fiber_profile.builder_profile(dev, sizes, dop_perct, profile_type,materials, alphas, n_steps)
+fiber_profile.builder_profile(dev, sizes, dop_perct, profile_type, materials, alphas, n_steps)
 
 # Define the constraints for each parameter
 constraints = [
     (3, 5),  # a1
-    #(3, 5),  # a2
-    #(3, 5),  # a3
-    #(30, 30),  # a4
+    # (3, 5),  # a2
+    # (3, 5),  # a3
+    # (30, 30),  # a4
     (0.02, 0.12)  # dop_a1
-    #(0, 0),  # dop_a2
-    #(0, 0),  # dop_a3
-    #(0, 0),  # dop_a4
-    #(1, 1),  # alpha_a1
-    #(0, 0),  # alpha_a2
-    #(0, 0),  # alpha_a3
-    #(0, 0),  # alpha_a4
+    # (0, 0),  # dop_a2
+    # (0, 0),  # dop_a3
+    # (0, 0),  # dop_a4
+    # (1, 1),  # alpha_a1
+    # (0, 0),  # alpha_a2
+    # (0, 0),  # alpha_a3
+    # (0, 0),  # alpha_a4
 ]
 
 # Set initial parameter values with random values within constraints
@@ -291,13 +313,14 @@ toolbox.register("select", tools.selNSGA2)
 
 # Configure the progress bar, it depends on the:
 # initial population(n),
-n = 100
+n = 5
 # number of individuals selected for the next generation
-mu = 50
+mu = 3
 # offspring from the population (lambda_) and
-lambda_ = 100
+lambda_ = 3
 # number of generations (ngen)
-ngen = 20
+ngen = 5
+
 ''''# total iterations (working on)
 global global_total
 global_total = n + lambda_ * ngen
@@ -306,10 +329,31 @@ global_counter = 0'''
 
 # Create the initial population
 population = toolbox.population(n)
+
+# Create a Statistics object and register the desired statistics
+stats = tools.Statistics(lambda ind: ind.fitness.values)
+stats.register("min", np.min, axis=0)
+stats.register("max", np.max, axis=0)
+stats.register("avg", np.mean, axis=0)
+stats.register("std", np.std, axis=0)
+
+logbook = tools.Logbook()
+
+
+# Evaluate the individuals with an invalid fitness
+'''invalid_ind = [ind for ind in population if not ind.fitness.valid]
+fitnesses = toolbox.map(toolbox.evaluate, invalid_ind)
+for ind, fit in zip(invalid_ind, fitnesses):
+    ind.fitness.values = fit'''
+
 try:
-    # Run the optimization algorithm
-    algorithms.eaMuPlusLambda(population, toolbox, mu=mu, lambda_=lambda_, cxpb=0.5, mutpb=0.5, ngen=ngen, stats=None,
-                              halloffame=None, verbose=True)
+    # Run the optimization algorithm with stats
+    _, logbook = algorithms.eaMuPlusLambda(population, toolbox, mu=mu, lambda_=lambda_, cxpb=0.5, mutpb=0.5, ngen=ngen,
+                                           stats=stats,
+                                           halloffame=None, verbose=True)
+    # Compile statistics about the population
+    print('logbook: ', logbook)
+
 except Exception as e:
     # Handle the exception
     print(f'An error occurred in the for loop: {str(e)}')
@@ -362,7 +406,6 @@ finally:
         print("dD/dF_0.1um:", best_solution.fitness.values[2])
     else:
         print("No solution found with obj2_val below 0.08")
-
 
     # setting FIMMWAVE at the best solution
     sizes[0] = best_solution[0]
