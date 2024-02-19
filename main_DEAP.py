@@ -1,24 +1,24 @@
 import random
 import matplotlib
-from deap import base, creator, tools, algorithms
-from datetime import datetime
-import time
+import matplotlib.pyplot as plt
 import numpy as np
+
+from deap import base, creator, tools, algorithms
 from pdPythonLib import *
 from datetime import datetime
 from simulation_run import *
 from core_profile_index_builder import *
-from time_wind_simulation import *
-import matplotlib.pyplot as plt
-from deap import tools
 from collections.abc import Sequence
 from itertools import repeat
 from core_type import FiberParameters
-import matplotlib.pyplot as plt
-from mpl_toolkits.mplot3d import Axes3D
 import mplcursors
 from deap.tools import Statistics
-import pickle
+
+from typing import Tuple
+
+# Define the reasonable limit before penalizing
+MIN_DISPERSION_LIMIT = 12
+MAX_DISPERSION_LIMIT = 30
 
 
 def exponential_penalty_function(x, x_optimal, alpha=0.1, lambda_param=0.5):
@@ -42,40 +42,75 @@ def exponential_penalty_function(x, x_optimal, alpha=0.1, lambda_param=0.5):
     return penalty
 
 
-def objective_function_dispersion(parameters):
-    # Initial parameters
+from typing import Tuple
+
+# Define the reasonable limit before penalizing
+MIN_DISPERSION_LIMIT = 12
+MAX_DISPERSION_LIMIT = 30
+
+
+def objective_function_dispersion(parameters: Tuple[float, float]) -> float:
+    """
+    Calculate the dispersion value for a given set of fiber parameters.
+
+    Parameters:
+    - parameters (tuple): A tuple containing the values of fiber parameters,
+      where parameters[n] corresponds to an n parameter of the fiber core, depending on the core type.
+
+    Returns:
+    - float: The dispersion value calculated based on the provided fiber parameters.
+
+    This function updates the fiber profile with the given parameters, runs simulations
+    for mode 1 and mode 3 using FIMMWAVE, and retrieves the dispersion value. If the
+    obtained dispersion value is outside the desired range (MIN_DISPERSION_LIMIT to MAX_DISPERSION_LIMIT),
+    it is penalized using an exponential penalty function.
+    If the simulation for mode 2 indicates isleakyMode2 as 2 (mode guided), the dispersion is set to MAX_DISPERSION_LIMIT.
+    """
+    # Initial parameters, defining the core type
     core_type = FiberParameters()
+
+    # Getting the standard constructive parameters for the study core profile
     param = core_type.core_type_meth('step index')
 
-    # Unpack attributes directly
+    # Unpack attributes directly from the core type method
     sizes, dop_perct, profile_type, materials, alphas, n_steps, dev = (
         param.sizes, param.dop_perct, param.profile_type,
         param.materials, param.alphas, param.n_steps, param.dev
     )
+
     # Unpack the variables
     a1, dop_a1 = parameters
-    # replacing variable parameters
+
+    # Replace the variable parameters
     sizes[0] = a1
     dop_perct[0] = dop_a1
 
+    # Update the core profile with the new characteristics
     fiber_profile.update_profile(dev, sizes, dop_perct, profile_type,
                                  materials, alphas, n_steps)
-    # running simulation
+
+    # Running simulation
+    # Define the output values
     param_Scan = {"beta": True, "neff": True, "a_eff": True, "alpha": True, "dispersion": True, "isLeaky": True,
                   "neffg": True, "fillFac": True, "gammaE": True}
 
+    # get the data for the 1rst and 2nd LP modes; since we configure both polarizations, the 2nd mode corresponds to '3'
     data_mode1 = experiment.simulate(param_Scan, mode='1')
     data_mode3 = experiment.simulate(param_Scan, mode='3')
 
-    # get the dispersion
-    disp = data_mode1[4]
-    isleakyMode2 = data_mode3[5]
-    # to avoid negative values, change later fot the finesse function
-    if disp < 12 or disp > 30:
-        disp = exponential_penalty_function(disp, 12)
-    if isleakyMode2 == 2:
-        disp = 100
-    return disp
+    # get the dispersion value for mode 1 and the guided status of mode 2
+    dispersion_mode1 = data_mode1[4]
+    is_leaky_mode2 = data_mode3[5]
+
+    # Penalization
+    if dispersion_mode1 < MIN_DISPERSION_LIMIT:
+        dispersion_mode1 = exponential_penalty_function(dispersion_mode1, MIN_DISPERSION_LIMIT)
+    if dispersion_mode1 > MAX_DISPERSION_LIMIT:
+        dispersion_mode1 = exponential_penalty_function(dispersion_mode1, MAX_DISPERSION_LIMIT)
+    if is_leaky_mode2 == 2:
+        dispersion_mode1 = MAX_DISPERSION_LIMIT
+
+    return dispersion_mode1
 
 
 def objective_function_slope(parameters):
@@ -249,9 +284,9 @@ fimmap.StartApp('C:\\Program Files\\PhotonD\\Fimmwave\\bin64\\fimmwave.exe', 510
 
 # MODIFY DEPENDING ON PLACE OF WORKING
 # from work
-# test_dir = 'D:\\OneDrive UPV\\OneDrive - UPV\PhD-m\\2023-2024\\FiberDesin_PhotonD\\FOdesign_optimization'
+test_dir = 'D:\\OneDrive UPV\\OneDrive - UPV\PhD-m\\2023-2024\\FiberDesin_PhotonD\\FOdesign_optimization'
 # from personal computer
-test_dir = 'C:\\Users\\Mario\\OneDrive - UPV\PhD-m\\2023-2024\\FiberDesin_PhotonD\\FOdesign_optimization'
+# test_dir = 'C:\\Users\\Mario\\OneDrive - UPV\PhD-m\\2023-2024\\FiberDesin_PhotonD\\FOdesign_optimization'
 
 fiber_profile = ProfileIndexBuilder(fimmap)
 fiber_profile.create_fimm_project('test', test_dir)
@@ -313,11 +348,11 @@ toolbox.register("select", tools.selNSGA2)
 
 # Configure the progress bar, it depends on the:
 # initial population(n),
-n = 5
+n = 10
 # number of individuals selected for the next generation
-mu = 3
+mu = 5
 # offspring from the population (lambda_) and
-lambda_ = 3
+lambda_ = 5
 # number of generations (ngen)
 ngen = 5
 
@@ -338,7 +373,6 @@ stats.register("avg", np.mean, axis=0)
 stats.register("std", np.std, axis=0)
 
 logbook = tools.Logbook()
-
 
 # Evaluate the individuals with an invalid fitness
 '''invalid_ind = [ind for ind in population if not ind.fitness.valid]
