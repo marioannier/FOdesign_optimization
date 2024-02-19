@@ -17,8 +17,14 @@ from deap.tools import Statistics
 from typing import Tuple
 
 # Define the reasonable limit before penalizing
-MIN_DISPERSION_LIMIT = 12
+MIN_DISPERSION_LIMIT = 0
 MAX_DISPERSION_LIMIT = 30
+MIN_SLOPE_AVERAGE = 0
+WORKING_WAVELENGTH = 1.55
+
+PARAMETERS_SCAN: dict[str, bool] = {"beta": True, "neff": True, "a_eff": True, "alpha": True, "dispersion": True,
+                                    "isLeaky": True,
+                                    "neffg": True, "fillFac": True, "gammaE": True}
 
 
 def exponential_penalty_function(x, x_optimal, alpha=0.1, lambda_param=0.5):
@@ -40,13 +46,6 @@ def exponential_penalty_function(x, x_optimal, alpha=0.1, lambda_param=0.5):
     # Compute the penalty using the exponential penalty function formula
     penalty = lambda_param * np.exp(alpha * deviation)
     return penalty
-
-
-from typing import Tuple
-
-# Define the reasonable limit before penalizing
-MIN_DISPERSION_LIMIT = 12
-MAX_DISPERSION_LIMIT = 30
 
 
 def objective_function_dispersion(parameters: Tuple[float, float]) -> float:
@@ -90,58 +89,68 @@ def objective_function_dispersion(parameters: Tuple[float, float]) -> float:
                                  materials, alphas, n_steps)
 
     # Running simulation
-    # Define the output values
-    param_Scan = {"beta": True, "neff": True, "a_eff": True, "alpha": True, "dispersion": True, "isLeaky": True,
-                  "neffg": True, "fillFac": True, "gammaE": True}
-
-    # get the data for the 1rst and 2nd LP modes; since we configure both polarizations, the 2nd mode corresponds to '3'
-    data_mode1 = experiment.simulate(param_Scan, mode='1')
-    data_mode3 = experiment.simulate(param_Scan, mode='3')
+    # get the data for the 1rst and 2nd LP modes;
+    # since we configure both polarizations, the 2nd mode corresponds to '3'
+    data_mode1 = experiment.simulate(PARAMETERS_SCAN, mode='1')
+    data_mode3 = experiment.simulate(PARAMETERS_SCAN, mode='3')
 
     # get the dispersion value for mode 1 and the guided status of mode 2
     dispersion_mode1 = data_mode1[4]
     is_leaky_mode2 = data_mode3[5]
 
+    #dispersion_mode1 = np.abs(dispersion_mode1 - MIN_DISPERSION_LIMIT)
+
     # Penalization
-    if dispersion_mode1 < MIN_DISPERSION_LIMIT:
-        dispersion_mode1 = exponential_penalty_function(dispersion_mode1, MIN_DISPERSION_LIMIT)
-    if dispersion_mode1 > MAX_DISPERSION_LIMIT:
-        dispersion_mode1 = exponential_penalty_function(dispersion_mode1, MAX_DISPERSION_LIMIT)
     if is_leaky_mode2 == 2:
         dispersion_mode1 = MAX_DISPERSION_LIMIT
 
     return dispersion_mode1
 
 
-def objective_function_slope(parameters):
-    # Initial parameters
+def objective_function_slope(parameters: Tuple[float, float]) -> float:
+    """
+    Calculate the absolute average slope of dispersion with respect to wavelength
+    for a given set of fiber parameters.
+
+    Parameters:
+    - parameters (tuple): A tuple containing the values of fiber parameters,
+      where parameters[n] corresponds to an n parameter of the fiber core, depending on the core type.
+
+    Returns:
+    - float: The absolute average slope of dispersion with respect to wavelength
+             calculated based on the provided fiber parameters.
+    """
+    # Initial parameters, defining the core type
     core_type = FiberParameters()
+
+    # Getting the standard constructive parameters for the study core profile
     param = core_type.core_type_meth('step index')
 
-    # Unpack attributes directly
+    # Unpack attributes directly from the core type method
     sizes, dop_perct, profile_type, materials, alphas, n_steps, dev = (
         param.sizes, param.dop_perct, param.profile_type,
         param.materials, param.alphas, param.n_steps, param.dev
     )
+
     # Unpack the variables
     a1, dop_a1 = parameters
+
     # replacing variable parameters
     sizes[0] = a1
     dop_perct[0] = dop_a1
 
+    # Update the core profile with the new characteristics
     fiber_profile.update_profile(dev, sizes, dop_perct, profile_type,
                                  materials, alphas, n_steps)
-    # these variables define the number of steps in terms of scaling factor
-    number_steps = 7  # la razon de cambio es de 2 nm de cambio
-    param_Name = ["lambda"]
+
+    # Define wavelength range and the sampling interval (lam_e-lam_s)/number_steps
+    number_steps = 7
     lam_s = 1.53
     lam_e = 1.56
     steps = np.linspace(lam_s, lam_e, number_steps)
 
-    # running simulation
-    param_Scan = {"beta": True, "neff": True, "a_eff": True, "alpha": True, "dispersion": True, "isLeaky": True,
-                  "neffg": True, "fillFac": True, "gammaE": True}  # cambiar a falsos y reducir el tamaño de data_mode1
-
+    # Running simulation
+    # get the data for the 1rst mode;
     data_mode1 = np.zeros((number_steps, 9))
 
     # Iterate over all scaling values
@@ -149,75 +158,109 @@ def objective_function_slope(parameters):
         # setting the work wavelength
         fiber_profile.set_wavelength(dev, wavelength)
         # running simulation
-        data_mode1[i, :] = experiment.simulate(param_Scan, mode='1')
+        data_mode1[i, :] = experiment.simulate(PARAMETERS_SCAN, mode='1')
 
-    # setting again to 1.55
-    wavelength = 1.55
-    fiber_profile.set_wavelength(dev, wavelength)
+    # setting to 1.55 at the end of the analysis
+    fiber_profile.set_wavelength(dev, WORKING_WAVELENGTH)
 
     # Calculate the derivative of dispersion with respect to wavelength
     slope = np.diff(data_mode1[:, 4]) / np.diff(steps * 1000)  # transform the wavelength to nm
 
+    # Calculate the average slope
     slope_ave = np.average(slope)
-    if slope_ave < 0.05:
-        slope_ave = exponential_penalty_function(slope_ave, 0.05)
-    return np.abs(slope_ave)
+    output = np.abs(slope_ave - MIN_SLOPE_AVERAGE)
+
+    # Penalization
+    if output == 0:
+        output = 5
+    return output
 
 
 def objective_function_err_fab(parameters):
-    # Unpack the variables
-    # initial parameters
+    """
+    Calculate the average absolute derivative of dispersion with respect to wavelength
+    for different scaling factors, simulating fabrication errors for a given set of fiber parameters.
+
+    Parameters:
+    - parameters (tuple): A tuple containing the values of fiber parameters,
+      where parameters[n] corresponds to an n parameter of the fiber core, depending on the core type.
+
+    Returns:
+    - float: The average absolute derivative of dispersion with respect to wavelength
+             calculated based on the provided fiber parameters and simulated fabrication errors.
+    """
+
+    # Define constants
+    ERR_FAB_MAX = 0.1
+    SCALING_STEPS = 3
+
+    # Initial parameters, defining the core type
     core_type = FiberParameters()
+
+    # Getting the standard constructive parameters for the study core profile
     param = core_type.core_type_meth('step index')
 
-    # Unpack attributes directly
+    # Unpack attributes directly from the core type method
     sizes, dop_perct, profile_type, materials, alphas, n_steps, dev = (
         param.sizes, param.dop_perct, param.profile_type,
         param.materials, param.alphas, param.n_steps, param.dev
     )
+
     # Unpack the variables
     a1, dop_a1 = parameters
+
     # replacing variable parameters
     sizes[0] = a1
     dop_perct[0] = dop_a1
 
-    # running simulation
-    param_Scan = {"beta": True, "neff": True, "a_eff": True, "alpha": True, "dispersion": True, "isLeaky": True,
-                  "neffg": True, "fillFac": True, "gammaE": True}
+    # scaling variable, first I find the ratio between the ERR_FAB_MAX and the central core diameter
+    # this is translated to a scaling factor. I.e. how much the scaling factor needs to change in order
+    # to introduce an error in fabrication of ERR_FAB_MAX
+    rep_factor_scala = ERR_FAB_MAX / a1
+    # Then I find the scaling factor values
+    steps = np.linspace(1 - rep_factor_scala, 1 + rep_factor_scala, SCALING_STEPS)
+    data_mode1 = np.zeros((SCALING_STEPS, 9))
 
-    # scaling variable (COMENTAR PARA ENTENDER)
-    scaling_steps = 3
-    err_max = 0.1
-    rep_factor_scala = err_max / a1  # Traduccion de 0.3um de error a factor de escala pero solo para determinar la dispersion
-    steps = np.linspace(1 - rep_factor_scala, 1 + rep_factor_scala, scaling_steps)
-    data_mode1 = np.zeros((scaling_steps, 9))
-    # aqui se determina la dispersion para cada fcator de escala desde -0.3um to 0.3um de error
+    # determine the dispersion for each factor of scale from -ERR_FAB_MAX to ERR_FAB_MAX
     for i, sca_fact in enumerate(steps):
         sizes[0] = a1 * sca_fact
         fiber_profile.update_profile(dev, sizes, dop_perct, profile_type, materials, alphas, n_steps)
         # running simulation
-        data_mode1[i, :] = experiment.simulate(param_Scan, mode='1')
+        data_mode1[i, :] = experiment.simulate(PARAMETERS_SCAN, mode='1')
 
-    # Calculate the derivative of dispersion with respect to wavelength
-    scaling_intervals = 2 * err_max / (scaling_steps - 1)
-    fac = 0.1 / scaling_intervals  # to convert to 0.1um
-    diff_err_fab = fac * np.diff(
-        data_mode1[:, 4])  # nm interval, i don't divide by 0.1 beacuse is include in the fac formula
+    # Calculate the derivative of dispersion with respect to an ERR_FAB_MAX
+    scaling_intervals = 2 * ERR_FAB_MAX / (SCALING_STEPS - 1)
+    fac = ERR_FAB_MAX / scaling_intervals
+    diff_err_fab = fac * np.diff(data_mode1[:, 4])
 
+    # determining the absolute value
     output = np.abs(np.average(diff_err_fab))
+    # check if there is some error and ponder it
     if output == 0:
-        output = 100
+        output = 5
     return output
 
 
-def evaluate(individual):
+def evaluate(individual: Tuple[float, float]) -> Tuple[float, float, float]:
+    """
+    Evaluate an individual using multiple objective functions.
+
+    Parameters:
+    - individual (tuple): A tuple containing the values of fiber parameters,
+      where individual[n] corresponds to an n parameter of the fiber core, depending on the core type.
+
+    Returns:
+    - tuple: A tuple containing the values of multiple objective functions calculated based on the individual's parameters.
+    """
     # Call the objective_function with the individual's parameters
     # Objective 1 calculation
     disp = objective_function_dispersion(individual)
     obj1 = disp
+
     # Objective 2 calculation
     slope = objective_function_slope(individual)
     obj2 = slope
+
     # Objective 3 calculation
     dif_fab_err = objective_function_err_fab(individual)
     obj3 = dif_fab_err
@@ -264,6 +307,11 @@ def custom_mutGaussian_constraints(individual, mu, sigma, indpb, constraints):
         if random.random() < indpb:
             mutated_value = individual[i] + random.gauss(m, s)
             individual[i] = max(min(mutated_value, max_value), min_value)
+            print('ind   ', individual)
+        else:
+            individual[i] = max(min(individual[i], max_value), min_value)
+            print('ind 1  ', individual)
+    print('ind 2  ', individual)
     return individual
 
 
@@ -348,13 +396,13 @@ toolbox.register("select", tools.selNSGA2)
 
 # Configure the progress bar, it depends on the:
 # initial population(n),
-n = 10
+n = 20
 # number of individuals selected for the next generation
-mu = 5
+mu = 10
 # offspring from the population (lambda_) and
-lambda_ = 5
+lambda_ = 10
 # number of generations (ngen)
-ngen = 5
+ngen = 10
 
 ''''# total iterations (working on)
 global global_total
@@ -385,8 +433,6 @@ try:
     _, logbook = algorithms.eaMuPlusLambda(population, toolbox, mu=mu, lambda_=lambda_, cxpb=0.5, mutpb=0.5, ngen=ngen,
                                            stats=stats,
                                            halloffame=None, verbose=True)
-    # Compile statistics about the population
-    print('logbook: ', logbook)
 
 except Exception as e:
     # Handle the exception
@@ -423,8 +469,8 @@ finally:
     min_obj1_val = float('inf')  # Initialize to positive infinity
     best_solution = None
     # minimum
-    thr = 0.08
-    thr_dD_fab = 1
+    thr = 0.07
+    thr_dD_fab = 0.4
     for ind in population:
         obj1_val, obj2_val, obj3_val = ind.fitness.values[0], ind.fitness.values[1], ind.fitness.values[2]
         if obj1_val < min_obj1_val and obj2_val < thr and obj3_val < thr_dD_fab:
