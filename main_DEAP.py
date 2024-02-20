@@ -18,9 +18,10 @@ from typing import Tuple
 
 # Define the reasonable limit before penalizing
 MIN_DISPERSION_LIMIT = 0
-MAX_DISPERSION_LIMIT = 30
+MAX_DISPERSION_PENALIZATION = 50
 MIN_SLOPE_AVERAGE = 0
 WORKING_WAVELENGTH = 1.55
+COUNTER = 0
 
 PARAMETERS_SCAN: dict[str, bool] = {"beta": True, "neff": True, "a_eff": True, "alpha": True, "dispersion": True,
                                     "isLeaky": True,
@@ -48,7 +49,87 @@ def exponential_penalty_function(x, x_optimal, alpha=0.1, lambda_param=0.5):
     return penalty
 
 
-def objective_function_dispersion(parameters: Tuple[float, float]) -> float:
+def feasible(individual):
+    """
+    Feasibility function for the individual. Returns True if feasible, False otherwise.
+
+    Parameters:
+    - individual (list): The individual to be checked for feasibility.
+    - constraints (list of tuples): List of tuples defining the constraints for each attribute.
+
+    Returns:
+    - bool: True if the individual is feasible, False otherwise.
+    """
+    # Define the constraints for each parameter
+    a1 = [(3, 5)]
+    a2 = [(2, 4)]
+    a3 = [(2, 4)]
+    a4 = [(30, 30)]
+
+    dop_a1 = [(0, 0.1)]
+    dop_a2 = [(0, 0.1)]
+    dop_a3 = [(0, 0)]
+    dop_a4 = [(0, 0)]
+
+    alpha_a1 = [(0, 0)]
+    alpha_a2 = [(0, 0)]
+    alpha_a3 = [(0, 0)]
+    alpha_a4 = [(0, 0)]
+
+    constraints = a1 + dop_a1
+
+    for i, (min_value, max_value) in enumerate(constraints):
+        if not (min_value <= individual[i] <= max_value):
+            return False
+    return True
+
+
+def distance(individual):
+    """
+    A quadratic distance function to the feasibility region, enhancing the attraction of the bowl.
+
+    Parameters:
+    - individual (list): The individual for which to calculate the distance.
+    - constraints (list of tuples): List of tuples defining the constraints for each attribute.
+
+    Returns:
+    - float: The quadratic distance from the feasibility region.
+
+    This function calculates the quadratic distance from the feasibility region based on the constraints
+    for each attribute. It enhances the attraction of the bowl-shaped feasible region by using the quadratic
+    distance function h(x) = Δ + (x - x0)^2, where x0 is the approximate edge of the valid zone.
+    """
+
+    # Define the constraints for each parameter
+    a1 = [(3, 5)]
+    a2 = [(2, 4)]
+    a3 = [(2, 4)]
+    a4 = [(30, 30)]
+
+    dop_a1 = [(0, 0.1)]
+    dop_a2 = [(0, 0.1)]
+    dop_a3 = [(0, 0)]
+    dop_a4 = [(0, 0)]
+
+    alpha_a1 = [(0, 0)]
+    alpha_a2 = [(0, 0)]
+    alpha_a3 = [(0, 0)]
+    alpha_a4 = [(0, 0)]
+
+    constraints = a1 + dop_a1
+
+    total_distance = 0.0
+
+    for i, (min_value, max_value) in enumerate(constraints):
+        if individual[i] < min_value:
+            total_distance += (min_value - individual[i]) ** 2
+        elif individual[i] > max_value:
+            total_distance += (individual[i] - max_value) ** 2
+
+    return total_distance
+
+
+def objective_function_dispersion(parameters):
     """
     Calculate the dispersion value for a given set of fiber parameters.
 
@@ -94,15 +175,16 @@ def objective_function_dispersion(parameters: Tuple[float, float]) -> float:
     data_mode1 = experiment.simulate(PARAMETERS_SCAN, mode='1')
     data_mode3 = experiment.simulate(PARAMETERS_SCAN, mode='3')
 
-    # get the dispersion value for mode 1 and the guided status of mode 2
+    # get the dispersion value for mode 1 and the guided status of mode 1 nad 2
     dispersion_mode1 = data_mode1[4]
+    is_leaky_mode1 = data_mode1[5]
     is_leaky_mode2 = data_mode3[5]
 
-    #dispersion_mode1 = np.abs(dispersion_mode1 - MIN_DISPERSION_LIMIT)
+    # dispersion_mode1 = np.abs(dispersion_mode1 - MIN_DISPERSION_LIMIT)
 
     # Penalization
-    if is_leaky_mode2 == 2:
-        dispersion_mode1 = MAX_DISPERSION_LIMIT
+    if is_leaky_mode1 == 1 or is_leaky_mode2 == 2:
+        dispersion_mode1 = MAX_DISPERSION_PENALIZATION
 
     return dispersion_mode1
 
@@ -168,11 +250,8 @@ def objective_function_slope(parameters: Tuple[float, float]) -> float:
 
     # Calculate the average slope
     slope_ave = np.average(slope)
-    output = np.abs(slope_ave - MIN_SLOPE_AVERAGE)
+    output = np.abs(slope_ave)
 
-    # Penalization
-    if output == 0:
-        output = 5
     return output
 
 
@@ -235,13 +314,11 @@ def objective_function_err_fab(parameters):
 
     # determining the absolute value
     output = np.abs(np.average(diff_err_fab))
-    # check if there is some error and ponder it
-    if output == 0:
-        output = 5
+
     return output
 
 
-def evaluate(individual: Tuple[float, float]) -> Tuple[float, float, float]:
+def evaluate(individual):
     """
     Evaluate an individual using multiple objective functions.
 
@@ -264,6 +341,8 @@ def evaluate(individual: Tuple[float, float]) -> Tuple[float, float, float]:
     # Objective 3 calculation
     dif_fab_err = objective_function_err_fab(individual)
     obj3 = dif_fab_err
+
+    print('disp: ', obj1, 'slope: ', obj2, 'dif_fab_err: ', obj3)
 
     return obj1, obj2, obj3
 
@@ -307,11 +386,8 @@ def custom_mutGaussian_constraints(individual, mu, sigma, indpb, constraints):
         if random.random() < indpb:
             mutated_value = individual[i] + random.gauss(m, s)
             individual[i] = max(min(mutated_value, max_value), min_value)
-            print('ind   ', individual)
         else:
             individual[i] = max(min(individual[i], max_value), min_value)
-            print('ind 1  ', individual)
-    print('ind 2  ', individual)
     return individual
 
 
@@ -357,21 +433,22 @@ fiber_profile.delete_layers()
 fiber_profile.builder_profile(dev, sizes, dop_perct, profile_type, materials, alphas, n_steps)
 
 # Define the constraints for each parameter
-constraints = [
-    (3, 5),  # a1
-    # (3, 5),  # a2
-    # (3, 5),  # a3
-    # (30, 30),  # a4
-    (0.02, 0.12)  # dop_a1
-    # (0, 0),  # dop_a2
-    # (0, 0),  # dop_a3
-    # (0, 0),  # dop_a4
-    # (1, 1),  # alpha_a1
-    # (0, 0),  # alpha_a2
-    # (0, 0),  # alpha_a3
-    # (0, 0),  # alpha_a4
-]
+a1 = [(3, 5)]
+a2 = [(2, 4)]
+a3 = [(2, 4)]
+a4 = [(30, 30)]
 
+dop_a1 = [(0, 0.1)]
+dop_a2 = [(0, 0.1)]
+dop_a3 = [(0, 0)]
+dop_a4 = [(0, 0)]
+
+alpha_a1 = [(0, 0)]
+alpha_a2 = [(0, 0)]
+alpha_a3 = [(0, 0)]
+alpha_a4 = [(0, 0)]
+
+constraints = a1 + dop_a1
 # Set initial parameter values with random values within constraints
 initial_values = [
     random.uniform(min_value, max_value) for min_value, max_value in constraints
@@ -390,19 +467,20 @@ toolbox = base.Toolbox()
 toolbox.register("individual", initIndividual, creator.Individual, initial_values, list, constraints)
 toolbox.register("population", tools.initRepeat, list, toolbox.individual)
 toolbox.register("evaluate", evaluate)
+toolbox.decorate("evaluate", tools.DeltaPenalty(feasible, (30, 3, 3), distance))
 toolbox.register("mate", tools.cxBlend, alpha=0.5)
 toolbox.register("mutate", custom_mutGaussian_constraints, mu=0, sigma=0.8, indpb=0.5, constraints=constraints)
 toolbox.register("select", tools.selNSGA2)
 
 # Configure the progress bar, it depends on the:
 # initial population(n),
-n = 20
+n = 300
 # number of individuals selected for the next generation
-mu = 10
+mu = 100
 # offspring from the population (lambda_) and
-lambda_ = 10
+lambda_ = 200
 # number of generations (ngen)
-ngen = 10
+ngen = 100
 
 ''''# total iterations (working on)
 global global_total
