@@ -58,6 +58,14 @@ class FiberParameters:
                 alphas = [0, 0, 0, 0]
                 n_steps = 2
 
+            case "three layers all GeO2 dp":
+                sizes = [4, 3, 5, 30]
+                dop_perct = [0.1, 0.04, 0.02, 0]
+                profile_type = ['Constant', 'Constant', 'Constant', 'Constant']
+                materials = ['GeO2-SiO2', 'GeO2-SiO2', 'GeO2-SiO2', 'SiO2']
+                alphas = [0, 0, 0, 0]
+                n_steps = 2
+
             case _:
                 raise ValueError(f"Unsupported core type: {core_type}")
 

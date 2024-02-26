@@ -9,7 +9,7 @@ class SimulationRun:
 
     def solver_config(self, solver='FDM Fiber Solver'):
 
-        dev = 'app.subnodes[1].subnodes[1]' # the device is one because I am going to have only one core type per project
+        dev = 'app.subnodes[1].subnodes[1]'  # the device is one because I am going to have only one core type per project
 
         match solver:
             case 'FDM Fiber Solver':
@@ -48,38 +48,42 @@ class SimulationRun:
             case _:
                 raise EnvironmentError("type of solver is not specify or is incorrect")
 
+    import numpy as np
 
     def simulate(self, param_Scan={"beta": True, "neff": True, "a_eff": True, "alpha": True, "dispersion": True,
                                    "isLeaky": True, "neffg": True, "fillFac": True, "gammaE": True}, mode='1'):
-        dev = 'app.subnodes[1].subnodes[1]' # the device is one because I am going to have only one core type per project
+        dev = 'app.subnodes[1].subnodes[1]'  # the device is one because I am going to have only one core type per project
 
-        num_true_values = list(param_Scan.values()).count(True) # determine the lenght of the parametres to save
+        num_true_values = list(param_Scan.values()).count(True)  # determine the length of the parameters to save
 
         data = np.zeros(num_true_values)
 
         self.fimmap.Exec(dev + ".evlist.update(1)")
+
+        def get_valid_number(value):
+            try:
+                return float(value)
+            except (ValueError, TypeError):
+                return -1000
+
         if param_Scan['beta']:
-            data[0] = np.real(self.fimmap.Exec(
-                dev + ".evlist.list[" + mode + "].beta()"))  # because the FIMM retun a (a+bj), complex number
+            data[0] = get_valid_number(np.real(self.fimmap.Exec(dev + ".evlist.list[" + mode + "].beta()")))
         if param_Scan['neff']:
-            data[1] = np.real(self.fimmap.Exec(
-                dev + ".evlist.list[" + mode + "].neff()"))  # because the FIMM return a (a+bj), complex number
+            data[1] = get_valid_number(np.real(self.fimmap.Exec(dev + ".evlist.list[" + mode + "].neff()")))
         self.fimmap.AddCmd(dev + ".evlist.list[" + mode + "].modedata.update(1)")
         if param_Scan['a_eff']:
-            data[2] = self.fimmap.Exec(dev + ".evlist.list[" + mode + "].modedata.a_eff()")
+            data[2] = get_valid_number(self.fimmap.Exec(dev + ".evlist.list[" + mode + "].modedata.a_eff()"))
         if param_Scan['alpha']:
-            data[3] = self.fimmap.Exec(dev + ".evlist.list[" + mode + "].modedata.alpha()")
+            data[3] = get_valid_number(self.fimmap.Exec(dev + ".evlist.list[" + mode + "].modedata.alpha()"))
         if param_Scan['dispersion']:
-            data[4] = self.fimmap.Exec(dev + ".evlist.list[" + mode + "].modedata.dispersion()")
+            data[4] = get_valid_number(self.fimmap.Exec(dev + ".evlist.list[" + mode + "].modedata.dispersion()"))
         if param_Scan['isLeaky']:
-            data[5] = self.fimmap.Exec(dev + ".evlist.list[" + mode + "].modedata.isLeaky()")
+            data[5] = get_valid_number(self.fimmap.Exec(dev + ".evlist.list[" + mode + "].modedata.isLeaky()"))
         if param_Scan['neffg']:
-            data[6] = self.fimmap.Exec(dev + ".evlist.list[" + mode + "].modedata.neffg()")
+            data[6] = get_valid_number(self.fimmap.Exec(dev + ".evlist.list[" + mode + "].modedata.neffg()"))
         if param_Scan['fillFac']:
-            data[7] = self.fimmap.Exec(dev + ".evlist.list[" + mode + "].modedata.fillFac()")
+            data[7] = get_valid_number(self.fimmap.Exec(dev + ".evlist.list[" + mode + "].modedata.fillFac()"))
         if param_Scan['gammaE']:
-            data[8] = self.fimmap.Exec(dev + ".evlist.list[" + mode + "].modedata.gammaE()")
+            data[8] = get_valid_number(self.fimmap.Exec(dev + ".evlist.list[" + mode + "].modedata.gammaE()"))
 
         return data
-
-

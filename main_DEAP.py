@@ -2,6 +2,7 @@ import random
 import matplotlib
 import matplotlib.pyplot as plt
 import numpy as np
+import time
 
 from deap import base, creator, tools, algorithms
 from pdPythonLib import *
@@ -62,13 +63,13 @@ def feasible(individual):
     """
     # Define the constraints for each parameter
     a1 = [(3, 5)]
-    a2 = [(2, 4)]
-    a3 = [(2, 4)]
+    a2 = [(2, 5)]
+    a3 = [(2, 5)]
     a4 = [(30, 30)]
 
     dop_a1 = [(0, 0.1)]
     dop_a2 = [(0, 0.1)]
-    dop_a3 = [(0, 0)]
+    dop_a3 = [(0, 0.1)]
     dop_a4 = [(0, 0)]
 
     alpha_a1 = [(0, 0)]
@@ -76,7 +77,7 @@ def feasible(individual):
     alpha_a3 = [(0, 0)]
     alpha_a4 = [(0, 0)]
 
-    constraints = a1 + dop_a1
+    constraints = a1 + a2 + a3 + dop_a1 + dop_a2 + dop_a3
 
     for i, (min_value, max_value) in enumerate(constraints):
         if not (min_value <= individual[i] <= max_value):
@@ -102,13 +103,13 @@ def distance(individual):
 
     # Define the constraints for each parameter
     a1 = [(3, 5)]
-    a2 = [(2, 4)]
-    a3 = [(2, 4)]
+    a2 = [(2, 5)]
+    a3 = [(2, 5)]
     a4 = [(30, 30)]
 
     dop_a1 = [(0, 0.1)]
     dop_a2 = [(0, 0.1)]
-    dop_a3 = [(0, 0)]
+    dop_a3 = [(0, 0.1)]
     dop_a4 = [(0, 0)]
 
     alpha_a1 = [(0, 0)]
@@ -116,7 +117,7 @@ def distance(individual):
     alpha_a3 = [(0, 0)]
     alpha_a4 = [(0, 0)]
 
-    constraints = a1 + dop_a1
+    constraints = a1 + a2 + a3 + dop_a1 + dop_a2 + dop_a3
 
     total_distance = 0.0
 
@@ -150,7 +151,7 @@ def objective_function_dispersion(parameters):
     core_type = FiberParameters()
 
     # Getting the standard constructive parameters for the study core profile
-    param = core_type.core_type_meth('step index')
+    param = core_type.core_type_meth('three layers all GeO2 dp')
 
     # Unpack attributes directly from the core type method
     sizes, dop_perct, profile_type, materials, alphas, n_steps, dev = (
@@ -159,11 +160,15 @@ def objective_function_dispersion(parameters):
     )
 
     # Unpack the variables
-    a1, dop_a1 = parameters
+    a1, a2, a3, dop_a1, dop_a2, dop_a3 = parameters
 
     # Replace the variable parameters
     sizes[0] = a1
+    sizes[1] = a2
+    sizes[2] = a3
     dop_perct[0] = dop_a1
+    dop_perct[1] = dop_a2
+    dop_perct[2] = dop_a3
 
     # Update the core profile with the new characteristics
     fiber_profile.update_profile(dev, sizes, dop_perct, profile_type,
@@ -185,11 +190,13 @@ def objective_function_dispersion(parameters):
     # Penalization
     if is_leaky_mode1 == 1 or is_leaky_mode2 == 2:
         dispersion_mode1 = MAX_DISPERSION_PENALIZATION
+    if dispersion_mode1 < 0:
+        dispersion_mode1 = MAX_DISPERSION_PENALIZATION
 
     return dispersion_mode1
 
 
-def objective_function_slope(parameters: Tuple[float, float]) -> float:
+def objective_function_slope(parameters):
     """
     Calculate the absolute average slope of dispersion with respect to wavelength
     for a given set of fiber parameters.
@@ -206,7 +213,7 @@ def objective_function_slope(parameters: Tuple[float, float]) -> float:
     core_type = FiberParameters()
 
     # Getting the standard constructive parameters for the study core profile
-    param = core_type.core_type_meth('step index')
+    param = core_type.core_type_meth('three layers all GeO2 dp')
 
     # Unpack attributes directly from the core type method
     sizes, dop_perct, profile_type, materials, alphas, n_steps, dev = (
@@ -215,11 +222,15 @@ def objective_function_slope(parameters: Tuple[float, float]) -> float:
     )
 
     # Unpack the variables
-    a1, dop_a1 = parameters
+    a1, a2, a3, dop_a1, dop_a2, dop_a3 = parameters
 
-    # replacing variable parameters
+    # Replace the variable parameters
     sizes[0] = a1
+    sizes[1] = a2
+    sizes[2] = a3
     dop_perct[0] = dop_a1
+    dop_perct[1] = dop_a2
+    dop_perct[2] = dop_a3
 
     # Update the core profile with the new characteristics
     fiber_profile.update_profile(dev, sizes, dop_perct, profile_type,
@@ -252,6 +263,10 @@ def objective_function_slope(parameters: Tuple[float, float]) -> float:
     slope_ave = np.average(slope)
     output = np.abs(slope_ave)
 
+    # bound the objetive function
+    if output > 0.5 or output == 0:
+        output = 60
+
     return output
 
 
@@ -277,7 +292,7 @@ def objective_function_err_fab(parameters):
     core_type = FiberParameters()
 
     # Getting the standard constructive parameters for the study core profile
-    param = core_type.core_type_meth('step index')
+    param = core_type.core_type_meth('three layers all GeO2 dp')
 
     # Unpack attributes directly from the core type method
     sizes, dop_perct, profile_type, materials, alphas, n_steps, dev = (
@@ -286,11 +301,15 @@ def objective_function_err_fab(parameters):
     )
 
     # Unpack the variables
-    a1, dop_a1 = parameters
+    a1, a2, a3, dop_a1, dop_a2, dop_a3 = parameters
 
-    # replacing variable parameters
+    # Replace the variable parameters
     sizes[0] = a1
+    sizes[1] = a2
+    sizes[2] = a3
     dop_perct[0] = dop_a1
+    dop_perct[1] = dop_a2
+    dop_perct[2] = dop_a3
 
     # scaling variable, first I find the ratio between the ERR_FAB_MAX and the central core diameter
     # this is translated to a scaling factor. I.e. how much the scaling factor needs to change in order
@@ -303,6 +322,8 @@ def objective_function_err_fab(parameters):
     # determine the dispersion for each factor of scale from -ERR_FAB_MAX to ERR_FAB_MAX
     for i, sca_fact in enumerate(steps):
         sizes[0] = a1 * sca_fact
+        sizes[1] = a2 * sca_fact
+        sizes[2] = a3 * sca_fact
         fiber_profile.update_profile(dev, sizes, dop_perct, profile_type, materials, alphas, n_steps)
         # running simulation
         data_mode1[i, :] = experiment.simulate(PARAMETERS_SCAN, mode='1')
@@ -314,6 +335,10 @@ def objective_function_err_fab(parameters):
 
     # determining the absolute value
     output = np.abs(np.average(diff_err_fab))
+
+    # bound the objetive function
+    if output > 0.5 or output == 0:
+        output = 60
 
     return output
 
@@ -341,8 +366,6 @@ def evaluate(individual):
     # Objective 3 calculation
     dif_fab_err = objective_function_err_fab(individual)
     obj3 = dif_fab_err
-
-    print('disp: ', obj1, 'slope: ', obj2, 'dif_fab_err: ', obj3)
 
     return obj1, obj2, obj3
 
@@ -391,6 +414,8 @@ def custom_mutGaussian_constraints(individual, mu, sigma, indpb, constraints):
     return individual
 
 
+start_time = time.time()
+
 matplotlib.use('TkAgg')
 # Get the current date and time
 current_time = datetime.now()
@@ -398,7 +423,7 @@ current_time = datetime.now()
 # Convert the date and time to a string
 time_string = current_time.strftime("%Y-%m-%d_%H-%M-%S")
 
-results_file = 'pareto_front_results_' + time_string + '.csv'  # MODIFY
+results_file = 'pareto_front_three_layers_GeO2' + time_string + '.csv'  # MODIFY
 # Open the CSV file in written mode
 f = open(results_file, 'w')
 
@@ -421,7 +446,7 @@ dev = "app.subnodes[1].subnodes[1]"
 # build profile
 # Initial parameters
 core_type = FiberParameters()
-param = core_type.core_type_meth('step index')
+param = core_type.core_type_meth('three layers all GeO2 dp')
 
 # Unpack attributes directly
 sizes, dop_perct, profile_type, materials, alphas, n_steps, dev = (
@@ -434,13 +459,13 @@ fiber_profile.builder_profile(dev, sizes, dop_perct, profile_type, materials, al
 
 # Define the constraints for each parameter
 a1 = [(3, 5)]
-a2 = [(2, 4)]
-a3 = [(2, 4)]
+a2 = [(2, 5)]
+a3 = [(2, 5)]
 a4 = [(30, 30)]
 
 dop_a1 = [(0, 0.1)]
 dop_a2 = [(0, 0.1)]
-dop_a3 = [(0, 0)]
+dop_a3 = [(0, 0.1)]
 dop_a4 = [(0, 0)]
 
 alpha_a1 = [(0, 0)]
@@ -448,7 +473,7 @@ alpha_a2 = [(0, 0)]
 alpha_a3 = [(0, 0)]
 alpha_a4 = [(0, 0)]
 
-constraints = a1 + dop_a1
+constraints = a1 + a2 + a3 + dop_a1 + dop_a2 + dop_a3
 # Set initial parameter values with random values within constraints
 initial_values = [
     random.uniform(min_value, max_value) for min_value, max_value in constraints
@@ -456,7 +481,7 @@ initial_values = [
 
 # simulation
 experiment = SimulationRun(fimmap)
-experiment.solver_config('GFS Fiber Solver')
+experiment.solver_config('FDM Fiber Solver')
 
 # Define the optimization problem
 creator.create("FitnessMulti", base.Fitness, weights=(-1.0, -1.0, -1.0))
@@ -474,11 +499,11 @@ toolbox.register("select", tools.selNSGA2)
 
 # Configure the progress bar, it depends on the:
 # initial population(n),
-n = 300
+n = 200
 # number of individuals selected for the next generation
 mu = 100
 # offspring from the population (lambda_) and
-lambda_ = 200
+lambda_ = 150
 # number of generations (ngen)
 ngen = 100
 
@@ -508,7 +533,8 @@ for ind, fit in zip(invalid_ind, fitnesses):
 
 try:
     # Run the optimization algorithm with stats
-    _, logbook = algorithms.eaMuPlusLambda(population, toolbox, mu=mu, lambda_=lambda_, cxpb=0.5, mutpb=0.5, ngen=ngen,
+    _, logbook = algorithms.eaMuPlusLambda(population, toolbox, mu=mu, lambda_=lambda_, cxpb=0.5, mutpb=0.5,
+                                           ngen=ngen,
                                            stats=stats,
                                            halloffame=None, verbose=True)
 
@@ -524,15 +550,15 @@ finally:
     obj3_values = [ind.fitness.values[2] for ind in population]
 
     # Write the header row
-    header = (['a1', 'dop_a1', 'disp', 'slope', 'dD/dF'])
+    header = (['a1', 'a2', 'a3', 'dop_a1', 'dop_a2', 'dop_a3', 'disp', 'slope', 'dD/dF'])
     # variable to store the data
     data = np.zeros((len(obj1_values), len(header)))
     i = 0
     # Write the data for each individual in the Pareto front into data variable
     for ind in population:
-        a1_val, dop_a1_val = ind[0], ind[1]
+        a1_val, a2_val, a3_val, dop_a1_val, dop_a2_val, dop_a3_val = ind[0], ind[1], ind[2], ind[3], ind[4], ind[5]
         obj1_val, obj2_val, obj3_val = ind.fitness.values[0], ind.fitness.values[1], ind.fitness.values[2]
-        data[i, :] = [a1_val, dop_a1_val, obj1_val, obj2_val, obj3_val]
+        data[i, :] = [a1_val, a2_val, a3_val, dop_a1_val, dop_a2_val, dop_a3_val, obj1_val, obj2_val, obj3_val]
         i = i + 1
 
     data_scan = data.astype('float')
@@ -543,7 +569,7 @@ finally:
         f.write(','.join(element) + '\n')
     f.close()
 
-    # Find the solution with the minimum obj1_val and obj2_val above 0.8
+    # Find the solution with the minimum obj1_val and obj2_val above X
     min_obj1_val = float('inf')  # Initialize to positive infinity
     best_solution = None
     # minimum
@@ -558,19 +584,32 @@ finally:
     if best_solution:
         print("Best solution with the minimum dispersion and slope bellow 0.08:")
         print("a1:", best_solution[0])
-        print("a1_dopa:", best_solution[1])
+        print("a2:", best_solution[1])
+        print("a2:", best_solution[2])
+        print("a1_dopa:", best_solution[3])
+        print("a2_dopa:", best_solution[4])
+        print("a3_dopa:", best_solution[5])
         print("Dispersion:", best_solution.fitness.values[0])
         print("Slope:", best_solution.fitness.values[1])
         print("dD/dF_0.1um:", best_solution.fitness.values[2])
     else:
-        print("No solution found with obj2_val below 0.08")
+        print("No solution found with obj2_val below X")
 
     # setting FIMMWAVE at the best solution
     sizes[0] = best_solution[0]
-    dop_perct[0] = best_solution[1]
+    sizes[1] = best_solution[1]
+    sizes[2] = best_solution[2]
+    dop_perct[0] = best_solution[3]
+    dop_perct[1] = best_solution[4]
+    dop_perct[2] = best_solution[5]
     fiber_profile.update_profile(dev, sizes, dop_perct, profile_type, materials, alphas, n_steps)
     wavelength = 1.55
     fiber_profile.set_wavelength(dev, wavelength)
+
+    # Record the end time
+    end_time = time.time()
+    t = np.round(end_time - start_time, 3) / 60
+    print(f'The simulation took: {t} minutes')
 
     # Plotting the Pareto front in 3D
     fig = plt.figure(figsize=(10, 8))
