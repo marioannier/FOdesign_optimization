@@ -1,6 +1,6 @@
 # Fiber Design Optimization
 
-This repository contains a Python project that uses a genetic algorithm to optimize the design parameters of an optical fiber with a specific refractive index profile. The goal is to minimize dispersion, slope of dispersion, and differential dispersion per fabrication error (dD/dF_0.1um) for a triangular profile with a ring.
+This repository contains a Python project that uses a genetic algorithm to optimize the design parameters of an optical fiber with a specific refractive index profile. The goal is to minimize dispersion, slope of dispersion, and differential dispersion per fabrication error (dD/dF_0.1um) for different index profiles.
 
 ## Table of Contents
 - [Introduction](#introduction)
