@@ -1,5 +1,3 @@
-from dataclasses import dataclass
-
 
 class FiberParameters:
     def __init__(self, sizes=[4, 5, 5, 30], dop_perct=[0.1, 0, 0, 0],

@@ -1,6 +1,5 @@
 import os
 import numpy as np
-import fiber_profile_gen as fp
 
 class ProfileIndexBuilder:
     def __init__(self, fimmap=object):

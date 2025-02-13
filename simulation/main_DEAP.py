@@ -1,22 +1,24 @@
 import random
-import matplotlib
-import matplotlib.pyplot as plt
-import numpy as np
 import time
+import numpy as np
+import matplotlib.pyplot as plt
+import matplotlib
+import mplcursors
 
-from deap import base, creator, tools, algorithms
-from pdPythonLib import *
 from datetime import datetime
-from simulation_run import *
-from core_profile_index_builder import *
 from collections.abc import Sequence
 from itertools import repeat
-from core_type import FiberParameters
-import mplcursors
+
+from deap import base, creator, tools, algorithms
 from deap.tools import Statistics
 
-from typing import Tuple
+from simulation_run import *
+from core_profile_index_builder import *
+from core_type import FiberParameters
+from pdPythonLib import *
 
+
+from typing import Tuple
 # Define the reasonable limit before penalizing
 MIN_DISPERSION_LIMIT = 0
 MAX_DISPERSION_PENALIZATION = 50
@@ -413,7 +415,6 @@ def custom_mutGaussian_constraints(individual, mu, sigma, indpb, constraints):
             individual[i] = max(min(individual[i], max_value), min_value)
     return individual
 
-
 start_time = time.time()
 
 matplotlib.use('TkAgg')
@@ -499,13 +500,13 @@ toolbox.register("select", tools.selNSGA2)
 
 # Configure the progress bar, it depends on the:
 # initial population(n),
-n = 200
+n = 20
 # number of individuals selected for the next generation
-mu = 100
+mu = 10
 # offspring from the population (lambda_) and
-lambda_ = 150
+lambda_ = 15
 # number of generations (ngen)
-ngen = 100
+ngen = 10
 
 ''''# total iterations (working on)
 global global_total
@@ -631,3 +632,4 @@ finally:
 
     # Show the plot interactively
     plt.show()
+

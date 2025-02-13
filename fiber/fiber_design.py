@@ -2,14 +2,8 @@
 # que ademas reciba el tipo de perfil: step, triangular o graded, cada una puede ser una function y recibir los
 # parametros que necesita como alpha y que a su vez me cree una FWG con la carateriaticas deseadas
 
-from pdPythonLib import *
-from core_profile_index_builder import *
-
-import fiber_profile_gen as fp
-
+from fiber_profile_gen import FiberProfileGen as fp
 import numpy as np
-import matplotlib.pyplot as plt
-import array
 
 
 class CoreProfile:
