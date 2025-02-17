@@ -2,14 +2,14 @@
 # que ademas reciba el tipo de perfil: step, triangular o graded, cada una puede ser una function y recibir los
 # parametros que necesita como alpha y que a su vez me cree una FWG con la carateriaticas deseadas
 
-from fiber_profile_gen import FiberProfileGen as fp
 import numpy as np
-
+from fiber.fiber_profile_gen import FiberProfileGen
 
 class CoreProfile:
     def __init__(self, fimmap=object):
         # by default it generate a triangular a=1
         self.fimmap = fimmap
+        self.fp = FiberProfileGen()
 
     def __set__(self, fimmap=object):
         self.fimmap = fimmap
@@ -136,7 +136,7 @@ class CoreProfile:
                 self.fimmap.Exec(dev + '.layers[1].setMAT(SiO2)')
                 self.fimmap.Exec(dev + '.layers[2].setMAT(F-SiO2_1)')
                 self.fimmap.Exec(dev + '.layers[3].setMAT(SiO2)')
-                dop_perct_grad = fp.FiberProfileGen.graded_refindex(self, alpha, n1_dop, n_steps)
+                dop_perct_grad = self.fp.graded_refindex(self, alpha, n1_dop, n_steps)
                 dop_perct.pop(0)
                 dop_perct = np.append(dop_perct_grad, dop_perct)
 
@@ -161,7 +161,7 @@ class CoreProfile:
                 self.fimmap.Exec(dev + '.layers[1].setMAT(SiO2)')
                 self.fimmap.Exec(dev + '.layers[2].setMAT(F-SiO2_1)')
                 self.fimmap.Exec(dev + '.layers[3].setMAT(SiO2)')
-                dop_perct_rc = fp.FiberProfileGen.rc_refindex(self, alpha, n1_dop, n_steps)
+                dop_perct_rc = self.fp.rc_refindex(self, alpha, n1_dop, n_steps)
                 dop_perct.pop(0) # I substitute the first layer for a group of variable values dop_perct_
                 dop_perct = np.append(dop_perct_rc, dop_perct)
 
@@ -224,7 +224,7 @@ class CoreProfile:
 
             case "Triangular T" | "Graded T":
                 n_steps = 100
-                dop_perct_grad = fp.FiberProfileGen.graded_refindex(self, alpha, n1_dop, n_steps)
+                dop_perct_grad = self.fp.graded_refindex(self, alpha, n1_dop, n_steps)
                 dop_perct.pop(0)
                 dop_perct = np.append(dop_perct_grad, dop_perct)
 
@@ -241,7 +241,7 @@ class CoreProfile:
 
             case "Raised Cosine T":
                 n_steps = 100
-                dop_perct_grad = fp.FiberProfileGen.rc_refindex(self, alpha, n1_dop, n_steps)
+                dop_perct_grad = self.fp.rc_refindex(self, alpha, n1_dop, n_steps)
                 dop_perct.pop(0)
                 dop_perct = np.append(dop_perct_grad, dop_perct)
 

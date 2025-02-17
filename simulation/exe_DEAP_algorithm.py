@@ -47,6 +47,7 @@ dev = "app.subnodes[1].subnodes[1]"
 # build profile
 # Initial parameters
 core_type = FiberParameters()
+
 param = core_type.core_type_meth('three layers all GeO2 dp')
 
 # Unpack attributes directly
@@ -81,11 +82,11 @@ initial_values = [
 ]
 # Configure the progress bar, it depends on the:
 # initial population(n),
-n = 20
+n = 10
 # number of individuals selected for the next generation
-mu = 10
+mu = 8
 # offspring from the population (lambda_) and
-lambda_ = 15
+lambda_ = 4
 # number of generations (ngen)
 ngen = 10
 
@@ -94,7 +95,7 @@ experiment = SimulationRun(fimmap)
 experiment.solver_config('FDM Fiber Solver')
 try:
     # execute the DEAP algorithm
-    optimization = core_DEAP_algorithm(fimmap, fiber_profile, experiment)
+    optimization = core_DEAP_algorithm.CoreDEAPAlgorithm(fimmap, fiber_profile, experiment)
     optm_population = optimization.algorithm_execution(n, mu, lambda_, ngen, initial_values, constraints)
 
 except Exception as e:

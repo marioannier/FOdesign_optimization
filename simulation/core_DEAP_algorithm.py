@@ -1,7 +1,6 @@
 import random
 import numpy as np
 
-
 from fiber.core_profile_index_builder import ProfileIndexBuilder
 
 from fiber.core_type import FiberParameters
@@ -20,14 +19,12 @@ class CoreDEAPAlgorithm:
     PARAMETERS_SCAN = {"beta": True, "neff": True, "a_eff": True, "alpha": True, "dispersion": True,
                        "isLeaky": True, "neffg": True, "fillFac": True, "gammaE": True}
 
-    def __init__(self, fimmap=object, fiber_profile=object,  experiment=object):
+    def __init__(self, fimmap=object, fiber_profile=object, experiment=object):
         self.fimmap = fimmap
         self.fiber_profile = fiber_profile
         self.experiment = experiment
 
-
-    @classmethod
-    def exponential_penalty_function(cls, x, x_optimal, alpha=0.1, lambda_param=0.5):
+    def exponential_penalty_function(self, x, x_optimal, alpha=0.1, lambda_param=0.5):
         """
         Compute the Exponential Penalty Function.
 
@@ -47,8 +44,7 @@ class CoreDEAPAlgorithm:
         penalty = lambda_param * np.exp(alpha * deviation)
         return penalty
 
-    @classmethod
-    def feasible(cls, individual):
+    def feasible(self, individual):
         """
         Feasibility function for the individual. Returns True if feasible, False otherwise.
 
@@ -82,8 +78,7 @@ class CoreDEAPAlgorithm:
                 return False
         return True
 
-    @classmethod
-    def distance(cls, individual):
+    def distance(self, individual):
         """
         A quadratic distance function to the feasibility region, enhancing the attraction of the bowl.
 
@@ -127,7 +122,6 @@ class CoreDEAPAlgorithm:
 
         return total_distance
 
-
     def objective_function_dispersion(self, parameters):
         """
         Calculate the dispersion value for a given set of fiber parameters.
@@ -170,7 +164,7 @@ class CoreDEAPAlgorithm:
 
         # Update the core profile with the new characteristics
         self.fiber_profile.update_profile(dev, sizes, dop_perct, profile_type,
-                                     materials, alphas, n_steps)
+                                          materials, alphas, n_steps)
 
         # Running simulation
         # get the data for the 1rst and 2nd LP modes;
@@ -232,7 +226,7 @@ class CoreDEAPAlgorithm:
 
         # Update the core profile with the new characteristics
         self.fiber_profile.update_profile(dev, sizes, dop_perct, profile_type,
-                                     materials, alphas, n_steps)
+                                          materials, alphas, n_steps)
 
         # Define wavelength range and the sampling interval (lam_e-lam_s)/number_steps
         number_steps = 7
@@ -266,7 +260,6 @@ class CoreDEAPAlgorithm:
             output = 60
 
         return output
-
 
     def objective_function_err_fab(self, parameters):
         """
@@ -336,8 +329,7 @@ class CoreDEAPAlgorithm:
 
         return output
 
-    @classmethod
-    def evaluate(cls, individual):
+    def evaluate(self, individual):
         """
         Evaluate an individual using multiple objective functions.
 
@@ -350,29 +342,28 @@ class CoreDEAPAlgorithm:
         """
         # Call the objective_function with the individual's parameters
         # Objective 1 calculation
-        disp = cls.objective_function_dispersion(individual)
+        disp = self.objective_function_dispersion(individual)
         obj1 = disp
 
         # Objective 2 calculation
-        slope = cls.objective_function_slope(individual)
+        slope = self.objective_function_slope(individual)
         obj2 = slope
 
         # Objective 3 calculation
-        dif_fab_err = cls.objective_function_err_fab(individual)
+        dif_fab_err = self.objective_function_err_fab(individual)
         obj3 = dif_fab_err
 
         return obj1, obj2, obj3
 
     # Function to initialize individuals
-    def initIndividual(icls, content, ccls, constraints):
+    def initIndividual(self, icls, content, ccls, constraints):
         # create n individuals with ramdom values into the constraint limits
         part = icls(content)
         for i, (min_value, max_value) in enumerate(constraints):
             part[i] = random.uniform(min_value, max_value)
         return part
 
-    @classmethod
-    def custom_mutGaussian_constraints(cls, individual, mu, sigma, indpb, constraints):
+    def custom_mutGaussian_constraints(self, individual, mu, sigma, indpb, constraints):
         """This function applies a gaussian mutation on the input individual
         while keeping the mutated values within the specified constraints.
 
@@ -406,8 +397,7 @@ class CoreDEAPAlgorithm:
                 individual[i] = max(min(individual[i], max_value), min_value)
         return individual
 
-    @classmethod
-    def algorithm_execution(cls, n=20, mu=10, lambda_=15, ngen=10, initial_values=0, constraints=0):
+    def algorithm_execution(self, n=20, mu=10, lambda_=15, ngen=10, initial_values=0, constraints=0):
 
         # CREATE THE HELP TO THE FUNCTION
 
@@ -423,12 +413,12 @@ class CoreDEAPAlgorithm:
 
         # Configure the optimization problem
         toolbox = base.Toolbox()
-        toolbox.register("individual", cls.initIndividual, creator.Individual, initial_values, list, cls.constraints)
+        toolbox.register("individual", self.initIndividual, creator.Individual, initial_values, list, constraints)
         toolbox.register("population", tools.initRepeat, list, toolbox.individual)
-        toolbox.register("evaluate", cls.evaluate)
-        toolbox.decorate("evaluate", tools.DeltaPenalty(cls.feasible, (30, 3, 3), cls.distance))
+        toolbox.register("evaluate", self.evaluate)
+        toolbox.decorate("evaluate", tools.DeltaPenalty(self.feasible, (30, 3, 3), self.distance))
         toolbox.register("mate", tools.cxBlend, alpha=0.5)
-        toolbox.register("mutate", cls.custom_mutGaussian_constraints, mu=0, sigma=0.8, indpb=0.5,
+        toolbox.register("mutate", self.custom_mutGaussian_constraints, mu=0, sigma=0.8, indpb=0.5,
                          constraints=constraints)
         toolbox.register("select", tools.selNSGA2)
 

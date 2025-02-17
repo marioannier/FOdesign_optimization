@@ -1,6 +1,4 @@
-import os
 import numpy as np
-from fiber import fiber_profile_gen as fp
 
 
 class SimulationRun:
