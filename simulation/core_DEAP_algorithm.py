@@ -19,10 +19,11 @@ class CoreDEAPAlgorithm:
     PARAMETERS_SCAN = {"beta": True, "neff": True, "a_eff": True, "alpha": True, "dispersion": True,
                        "isLeaky": True, "neffg": True, "fillFac": True, "gammaE": True}
 
-    def __init__(self, fimmap=object, fiber_profile=object, experiment=object):
+    def __init__(self, fimmap=object, fiber_profile=object, experiment=object, type_index_profile=None):
         self.fimmap = fimmap
         self.fiber_profile = fiber_profile
         self.experiment = experiment
+        self.type_index_profile = type_index_profile
 
     def exponential_penalty_function(self, x, x_optimal, alpha=0.1, lambda_param=0.5):
         """
@@ -143,7 +144,7 @@ class CoreDEAPAlgorithm:
         core_type = FiberParameters()
 
         # Getting the standard constructive parameters for the study core profile
-        param = core_type.core_type_meth('three layers all GeO2 dp')
+        param = core_type.core_type_meth(self.type_index_profile)
 
         # Unpack attributes directly from the core type method
         sizes, dop_perct, profile_type, materials, alphas, n_steps, dev = (
@@ -183,10 +184,59 @@ class CoreDEAPAlgorithm:
         # Penalization
         if is_leaky_mode1 == 1 or is_leaky_mode2 == 2:
             dispersion_mode1 = self.MAX_DISPERSION_PENALIZATION
-        if dispersion_mode1 < 0:
-            dispersion_mode1 = self.MAX_DISPERSION_PENALIZATION
+        # eliminado pq queremos una dispersion muy negativa
+        #if dispersion_mode1 < 0:
+            #dispersion_mode1 = self.MAX_DISPERSION_PENALIZATION
 
         return dispersion_mode1
+    def objective_function_confinement_factor(self, parameters):
+        """
+
+        """
+        # Initial parameters, defining the core type
+        core_type = FiberParameters()
+
+        # Getting the standard constructive parameters for the study core profile
+        param = core_type.core_type_meth(self.type_index_profile)
+
+        # Unpack attributes directly from the core type method
+        sizes, dop_perct, profile_type, materials, alphas, n_steps, dev = (
+            param.sizes, param.dop_perct, param.profile_type,
+            param.materials, param.alphas, param.n_steps, param.dev
+        )
+
+        # Unpack the variables
+        a1, a2, a3, dop_a1, dop_a2, dop_a3 = parameters
+
+        # Replace the variable parameters
+        sizes[0] = a1
+        sizes[1] = a2
+        sizes[2] = a3
+        dop_perct[0] = dop_a1
+        dop_perct[1] = dop_a2
+        dop_perct[2] = dop_a3
+
+        # Update the core profile with the new characteristics
+        self.fiber_profile.update_profile(dev, sizes, dop_perct, profile_type,
+                                          materials, alphas, n_steps)
+
+        # Running simulation
+        # get the data for the 1rst and 2nd LP modes;
+        # since we configure both polarizations, the 2nd mode corresponds to '3'
+
+        data_mode1 = self.experiment.simulate(self.PARAMETERS_SCAN, mode='1')
+        data_mode3 = self.experiment.simulate(self.PARAMETERS_SCAN, mode='3')
+
+        # get the Confinement factor value for mode 1 and the guided status of mode 1 nad 2
+        confinement_factor = data_mode1[4]
+        is_leaky_mode1 = data_mode1[5]
+        is_leaky_mode2 = data_mode3[5]
+
+        # Penalization
+        if is_leaky_mode1 == 1 or is_leaky_mode2 == 2:
+            confinement_factor = self.MAX_DISPERSION_PENALIZATION
+
+        return confinement_factor
 
     def objective_function_slope(self, parameters):
         """
@@ -205,7 +255,7 @@ class CoreDEAPAlgorithm:
         core_type = FiberParameters()
 
         # Getting the standard constructive parameters for the study core profile
-        param = core_type.core_type_meth('three layers all GeO2 dp')
+        param = core_type.core_type_meth(self.type_index_profile)
 
         # Unpack attributes directly from the core type method
         sizes, dop_perct, profile_type, materials, alphas, n_steps, dev = (
@@ -279,7 +329,7 @@ class CoreDEAPAlgorithm:
         core_type = FiberParameters()
 
         # Getting the standard constructive parameters for the study core profile
-        param = core_type.core_type_meth('three layers all GeO2 dp')
+        param = core_type.core_type_meth(self.type_index_profile)
 
         # Unpack attributes directly from the core type method
         sizes, dop_perct, profile_type, materials, alphas, n_steps, dev = (

@@ -3,17 +3,15 @@ import matplotlib
 import matplotlib.pyplot as plt
 import numpy as np
 import time
+import mplcursors
 
 from fiber.core_profile_index_builder import ProfileIndexBuilder
 from fiber.core_type import FiberParameters
 from simulation import SimulationRun
 from simulation import core_DEAP_algorithm
 
-
-from deap import base, creator, tools, algorithms
 from pdPythonLib import *
 from datetime import datetime
-import mplcursors
 
 start_time = time.time()
 
@@ -24,7 +22,7 @@ current_time = datetime.now()
 # Convert the date and time to a string
 time_string = current_time.strftime("%Y-%m-%d_%H-%M-%S")
 
-results_file = 'pareto_front_three_layers_GeO2' + time_string + '.csv'  # MODIFY
+results_file = 'triangular with ring_test' + time_string + '.csv'  # MODIFY
 # Open the CSV file in written mode
 f = open(results_file, 'w')
 
@@ -44,11 +42,12 @@ fiber_profile.add_moduleFWG('Module 1')
 fiber_profile.set_material_db(test_dir, '\\refbase_2.mat')
 dev = "app.subnodes[1].subnodes[1]"
 
-# build profile
+# build profile with index-profile:
+type_index_profile = 'triangular with ring'
 # Initial parameters
 core_type = FiberParameters()
 
-param = core_type.core_type_meth('three layers all GeO2 dp')
+param = core_type.core_type_meth(type_index_profile)
 
 # Unpack attributes directly
 sizes, dop_perct, profile_type, materials, alphas, n_steps, dev = (
@@ -65,12 +64,12 @@ a2 = [(2, 5)]
 a3 = [(2, 5)]
 a4 = [(30, 30)]
 
-dop_a1 = [(0, 0.1)]
-dop_a2 = [(0, 0.1)]
-dop_a3 = [(0, 0.1)]
+dop_a1 = [(0.01, 0.15)]
+dop_a2 = [(0, 0)]
+dop_a3 = [(0.01, 0.15)]
 dop_a4 = [(0, 0)]
 
-alpha_a1 = [(0, 0)]
+alpha_a1 = [(1, 1)]
 alpha_a2 = [(0, 0)]
 alpha_a3 = [(0, 0)]
 alpha_a4 = [(0, 0)]
@@ -81,21 +80,22 @@ initial_values = [
     random.uniform(min_value, max_value) for min_value, max_value in constraints
 ]
 # Configure the progress bar, it depends on the:
+
 # initial population(n),
-n = 10
+n = 100
 # number of individuals selected for the next generation
-mu = 8
+mu = 50
 # offspring from the population (lambda_) and
-lambda_ = 4
+lambda_ = 200
 # number of generations (ngen)
-ngen = 10
+ngen = 200
 
 # simulation
 experiment = SimulationRun(fimmap)
 experiment.solver_config('FDM Fiber Solver')
 try:
     # execute the DEAP algorithm
-    optimization = core_DEAP_algorithm.CoreDEAPAlgorithm(fimmap, fiber_profile, experiment)
+    optimization = core_DEAP_algorithm.CoreDEAPAlgorithm(fimmap, fiber_profile, experiment, type_index_profile)
     optm_population = optimization.algorithm_execution(n, mu, lambda_, ngen, initial_values, constraints)
 
 except Exception as e:
