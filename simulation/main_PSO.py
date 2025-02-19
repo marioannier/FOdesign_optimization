@@ -9,7 +9,6 @@ from pdPythonLib import *
 from datetime import datetime
 from simulation_run import *
 from core_profile_index_builder import *
-from time_wind_simulation import *
 from core_type import FiberParameters
 
 PARAMETERS_SCAN: dict[str, bool] = {"beta": True, "neff": True, "a_eff": True, "alpha": True, "dispersion": True,

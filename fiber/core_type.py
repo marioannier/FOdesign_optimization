@@ -70,7 +70,7 @@ class FiberParameters:
                 profile_type = ['Linear', 'Constant', 'Constant', 'Constant']
                 materials = ['GeO2-SiO2', 'SiO2', 'SiO2', 'SiO2']
                 alphas = [1, 0, 0, 0]
-                n_steps = 50
+                n_steps = 81
 
             case "triangular with trench F-SiO2_1":
                 sizes = [4, 3, 5, 30]
@@ -78,7 +78,7 @@ class FiberParameters:
                 profile_type = ['Linear', 'Constant', 'Constant', 'Constant']
                 materials = ['GeO2-SiO2', 'SiO2_2', 'F-SiO2_2', 'SiO2']
                 alphas = [1, 0, 0, 0]
-                n_steps = 50
+                n_steps = 20
 
             case "triangular with trench F-SiO2_2":
                 sizes = [4, 3, 5, 30]
@@ -86,7 +86,7 @@ class FiberParameters:
                 profile_type = ['Linear', 'Constant', 'Constant', 'Constant']
                 materials = ['GeO2-SiO2', 'SiO2_2', 'F-SiO2_2', 'SiO2']
                 alphas = [1, 0, 0, 0]
-                n_steps = 50
+                n_steps = 20
 
             case "triangular with ring":
                 sizes = [4, 3, 5, 30]
@@ -94,7 +94,7 @@ class FiberParameters:
                 profile_type = ['Linear', 'Constant', 'Constant', 'Constant']
                 materials = ['GeO2-SiO2', 'SiO2', 'GeO2-SiO2', 'SiO2']
                 alphas = [1, 0, 0, 0]
-                n_steps = 50
+                n_steps = 20
 
             case _:
                 raise ValueError(f"Unsupported core type: {core_type}")

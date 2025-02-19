@@ -1,8 +1,6 @@
 import random
 import numpy as np
 
-from fiber.core_profile_index_builder import ProfileIndexBuilder
-
 from fiber.core_type import FiberParameters
 
 from collections.abc import Sequence
@@ -457,37 +455,43 @@ class CoreDEAPAlgorithm:
         # lambda_ offspring from the population (lambda_) and
         # ngen number of generations (ngen)
 
-        # Define the optimization problem
-        creator.create("FitnessMulti", base.Fitness, weights=(-1.0, -1.0, -1.0))
-        creator.create("Individual", list, fitness=creator.FitnessMulti)
+        try:
+            # Define the optimization problem
+            creator.create("FitnessMulti", base.Fitness, weights=(-1.0, -1.0, -1.0))
+            creator.create("Individual", list, fitness=creator.FitnessMulti)
 
-        # Configure the optimization problem
-        toolbox = base.Toolbox()
-        toolbox.register("individual", self.initIndividual, creator.Individual, initial_values, list, constraints)
-        toolbox.register("population", tools.initRepeat, list, toolbox.individual)
-        toolbox.register("evaluate", self.evaluate)
-        toolbox.decorate("evaluate", tools.DeltaPenalty(self.feasible, (30, 3, 3), self.distance))
-        toolbox.register("mate", tools.cxBlend, alpha=0.5)
-        toolbox.register("mutate", self.custom_mutGaussian_constraints, mu=0, sigma=0.8, indpb=0.5,
-                         constraints=constraints)
-        toolbox.register("select", tools.selNSGA2)
+            # Configure the optimization problem
+            toolbox = base.Toolbox()
+            toolbox.register("individual", self.initIndividual, creator.Individual, initial_values, list, constraints)
+            toolbox.register("population", tools.initRepeat, list, toolbox.individual)
+            toolbox.register("evaluate", self.evaluate)
+            toolbox.decorate("evaluate", tools.DeltaPenalty(self.feasible, (30, 3, 3), self.distance))
+            toolbox.register("mate", tools.cxBlend, alpha=0.5)
+            toolbox.register("mutate", self.custom_mutGaussian_constraints, mu=0, sigma=0.8, indpb=0.5,
+                             constraints=constraints)
+            toolbox.register("select", tools.selNSGA2)
 
-        logbook = tools.Logbook()
+            logbook = tools.Logbook()
 
-        # Create the initial population
-        population = toolbox.population(n)
+            # Create the initial population
+            population = toolbox.population(n)
 
-        # Create a Statistics object and register the desired statistics
-        stats = tools.Statistics(lambda ind: ind.fitness.values)
-        stats.register("min", np.min, axis=0)
-        stats.register("max", np.max, axis=0)
-        stats.register("avg", np.mean, axis=0)
-        stats.register("std", np.std, axis=0)
+            # Create a Statistics object and register the desired statistics
+            stats = tools.Statistics(lambda ind: ind.fitness.values)
+            stats.register("min", np.min, axis=0)
+            stats.register("max", np.max, axis=0)
+            stats.register("avg", np.mean, axis=0)
+            stats.register("std", np.std, axis=0)
 
-        # Run the optimization algorithm with stats
-        _, logbook = algorithms.eaMuPlusLambda(population, toolbox, mu=mu, lambda_=lambda_, cxpb=0.5, mutpb=0.5,
-                                               ngen=ngen,
-                                               stats=stats,
-                                               halloffame=None, verbose=True)
+            # Run the optimization algorithm with stats
+            _, logbook = algorithms.eaMuPlusLambda(population, toolbox, mu=mu, lambda_=lambda_, cxpb=0.5, mutpb=0.5,
+                                                   ngen=ngen,
+                                                   stats=stats,
+                                                   halloffame=None, verbose=True)
 
-        return population
+        except Exception as e:
+            # Handle the exception
+            print(f'An error occurred in core_DEAP_algorithm: {str(e)}')
+
+        finally:
+            return population

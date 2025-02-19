@@ -22,7 +22,7 @@ current_time = datetime.now()
 # Convert the date and time to a string
 time_string = current_time.strftime("%Y-%m-%d_%H-%M-%S")
 
-results_file = 'triangular with ring_test' + time_string + '.csv'  # MODIFY
+results_file = 'test' + time_string + '.csv'  # MODIFY
 # Open the CSV file in written mode
 f = open(results_file, 'w')
 
@@ -43,7 +43,7 @@ fiber_profile.set_material_db(test_dir, '\\refbase_2.mat')
 dev = "app.subnodes[1].subnodes[1]"
 
 # build profile with index-profile:
-type_index_profile = 'triangular with ring'
+type_index_profile = 'triangular'
 # Initial parameters
 core_type = FiberParameters()
 
@@ -66,7 +66,7 @@ a4 = [(30, 30)]
 
 dop_a1 = [(0.01, 0.15)]
 dop_a2 = [(0, 0)]
-dop_a3 = [(0.01, 0.15)]
+dop_a3 = [(0.01, 0.05)]
 dop_a4 = [(0, 0)]
 
 alpha_a1 = [(1, 1)]
@@ -82,13 +82,13 @@ initial_values = [
 # Configure the progress bar, it depends on the:
 
 # initial population(n),
-n = 100
+n = 10
 # number of individuals selected for the next generation
-mu = 50
+mu = 10
 # offspring from the population (lambda_) and
-lambda_ = 200
+lambda_ = 10
 # number of generations (ngen)
-ngen = 200
+ngen = 5
 
 # simulation
 experiment = SimulationRun(fimmap)

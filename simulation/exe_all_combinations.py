@@ -6,12 +6,11 @@ Type of Regions: 'Constant', 'Linear' | 'Graded' (alpha = 1, alpha > 0 & alpha !
 '''
 
 import time
-import numpy as np
 from pdPythonLib import *
 from datetime import datetime
 from simulation_run import *
-from core_profile_index_builder import *
-from time_wind_simulation import *
+from fiber.core_profile_index_builder import ProfileIndexBuilder
+
 
 # Get the current date and time
 current_time = datetime.now()
@@ -19,7 +18,7 @@ current_time = datetime.now()
 # Convert the date and time to a string
 time_string = current_time.strftime("%Y-%m-%d_%H-%M-%S")
 
-results_file = 'err_a2_0.5um_core6_TriangularWithTrench_' + time_string + '.csv'  # MODIFY
+results_file = 'test_' + time_string + '.csv'  # MODIFY
 f = open(results_file, 'w')
 fimmap = pdApp()
 fimmap.StartApp('C:\\Program Files\\PhotonD\\Fimmwave\\bin64\\fimmwave.exe', 5101)
@@ -31,16 +30,16 @@ test_dir = 'D:\\OneDrive UPV\\OneDrive - UPV\PhD-m\\2023-2024\\FiberDesin_Photon
 # test_dir = 'C:\\Users\\Mario\\OneDrive - UPV\PhD-m\\2023-2024\\FiberDesin_PhotonD\\FOdesign_optimization'
 
 fiber_profile = ProfileIndexBuilder(fimmap)
-fiber_profile.create_fimm_project('test', test_dir)
+fiber_profile.create_fimm_project('test_disp', test_dir)
 fiber_profile.add_moduleFWG('Module 1')
 fiber_profile.set_material_db(test_dir, '\\refbase_2.mat')
 dev = "app.subnodes[1].subnodes[1]"
 
 ## variation of input parameters MODIFY
 # Defines the ranges for each parameter
-a1 = np.linspace(5.27, 5.27, 1)
-a2 = np.linspace(3.14, 4.14, 100)
-a3 = np.linspace(3.51, 3.51, 1)
+a1 = np.linspace(5, 5, 1)
+a2 = np.linspace(3, 3, 1)
+a3 = np.linspace(3, 3, 1)
 a4 = np.linspace(15, 15, 1)
 a5 = np.linspace(15, 15, 1)
 
@@ -66,7 +65,7 @@ i = 0
 
 # simulation
 experiment = SimulationRun(fimmap)
-experiment.solver_config('GFS Fiber Solver')
+experiment.solver_config('FDM Fiber Solver')
 
 param_Scan = {"beta": True, "neff": True, "a_eff": True, "alpha": True, "dispersion": True, "isLeaky": True,
               "neffg": True, "fillFac": True, "gammaE": True}
@@ -82,14 +81,8 @@ header = (
      "beta (Real) mode 3", "neff (Real) mode 3", "a_eff mode 3", "alpha mode 3", "dispersion mode 3", "isLeaky mode 3",
      "neffg mode 3", "fillFac mode 3", "gammaE mode 3"])'''
 
-# showing the approximate simulation time
-wi = SimulationTimeWind()
 # prof = 'steps', 'triangular', 'graded', 'raised cosine'
 
-stop = wi.show_confirmation_window('steps', steps)
-if not stop:
-    print('The simulation was stopped')
-    sys.exit()
 try:
     # Iterate over all combinations of parameters
     for a1_val in a1:
@@ -112,10 +105,10 @@ try:
                                                              a4_dopant_val, a5_dopant_val]
                                                 profile_type = ['Linear', 'Constant', 'Constant', 'Constant',
                                                                 'Constant']
-                                                materials = ['GeO2-SiO2', 'SiO2', 'F-SiO2_1',
+                                                materials = ['GeO2-SiO2', 'SiO2', 'SiO2',
                                                              'SiO2', 'SiO2']
                                                 alphas = [a1_alpha_val, alpha_a2, alpha_a3, alpha_a4, alpha_a5]
-                                                n_steps = 50  # 2 for constant
+                                                n_steps = 101  # 2 for constant
 
                                                 if i == 0:
                                                     fiber_profile.delete_layers()

@@ -1,0 +1,10 @@
+numpy
+matplotlib
+mplcursors
+deap
+time
+datetime
+itertools
+collections
+random
+os
