@@ -55,9 +55,9 @@ class CoreDEAPAlgorithm:
         - bool: True if the individual is feasible, False otherwise.
         """
         # Define the constraints for each parameter
-        a1 = [(3, 5)]
-        a2 = [(2, 5)]
-        a3 = [(2, 5)]
+        a1 = [(1.5, 5)]
+        a2 = [(1.5, 5)]
+        a3 = [(1.5, 5)]
         a4 = [(30, 30)]
 
         dop_a1 = [(0, 0.1)]
@@ -65,7 +65,7 @@ class CoreDEAPAlgorithm:
         dop_a3 = [(0, 0.1)]
         dop_a4 = [(0, 0)]
 
-        alpha_a1 = [(0, 0)]
+        alpha_a1 = [(0, 2)]
         alpha_a2 = [(0, 0)]
         alpha_a3 = [(0, 0)]
         alpha_a4 = [(0, 0)]
@@ -93,10 +93,9 @@ class CoreDEAPAlgorithm:
         distance function h(x) = Δ + (x - x0)^2, where x0 is the approximate edge of the valid zone.
         """
 
-        # Define the constraints for each parameter
-        a1 = [(3, 5)]
-        a2 = [(2, 5)]
-        a3 = [(2, 5)]
+        a1 = [(1.5, 5)]
+        a2 = [(1.5, 5)]
+        a3 = [(1.5, 5)]
         a4 = [(30, 30)]
 
         dop_a1 = [(0, 0.1)]
@@ -104,7 +103,7 @@ class CoreDEAPAlgorithm:
         dop_a3 = [(0, 0.1)]
         dop_a4 = [(0, 0)]
 
-        alpha_a1 = [(0, 0)]
+        alpha_a1 = [(0, 2)]
         alpha_a2 = [(0, 0)]
         alpha_a3 = [(0, 0)]
         alpha_a4 = [(0, 0)]
@@ -177,64 +176,21 @@ class CoreDEAPAlgorithm:
         is_leaky_mode1 = data_mode1[5]
         is_leaky_mode2 = data_mode3[5]
 
-        # dispersion_mode1 = np.abs(dispersion_mode1 - MIN_DISPERSION_LIMIT)
+        # getting the confinement factor value
+        confinement_factor = data_mode1[7]
 
         # Penalization
         if is_leaky_mode1 == 1 or is_leaky_mode2 == 2:
             dispersion_mode1 = self.MAX_DISPERSION_PENALIZATION
-        # eliminado pq queremos una dispersion muy negativa
-        #if dispersion_mode1 < 0:
-            #dispersion_mode1 = self.MAX_DISPERSION_PENALIZATION
+
+        #OJO DETERMINAR EL VALOR DEL confinement_factor CORRECO, 0.5 ES UN APROX
+        if confinement_factor < 0.5:
+            dispersion_mode1 = self.MAX_DISPERSION_PENALIZATION
+
+        if dispersion_mode1 < -500:
+            dispersion_mode1 = self.MAX_DISPERSION_PENALIZATION
 
         return dispersion_mode1
-    def objective_function_confinement_factor(self, parameters):
-        """
-
-        """
-        # Initial parameters, defining the core type
-        core_type = FiberParameters()
-
-        # Getting the standard constructive parameters for the study core profile
-        param = core_type.core_type_meth(self.type_index_profile)
-
-        # Unpack attributes directly from the core type method
-        sizes, dop_perct, profile_type, materials, alphas, n_steps, dev = (
-            param.sizes, param.dop_perct, param.profile_type,
-            param.materials, param.alphas, param.n_steps, param.dev
-        )
-
-        # Unpack the variables
-        a1, a2, a3, dop_a1, dop_a2, dop_a3 = parameters
-
-        # Replace the variable parameters
-        sizes[0] = a1
-        sizes[1] = a2
-        sizes[2] = a3
-        dop_perct[0] = dop_a1
-        dop_perct[1] = dop_a2
-        dop_perct[2] = dop_a3
-
-        # Update the core profile with the new characteristics
-        self.fiber_profile.update_profile(dev, sizes, dop_perct, profile_type,
-                                          materials, alphas, n_steps)
-
-        # Running simulation
-        # get the data for the 1rst and 2nd LP modes;
-        # since we configure both polarizations, the 2nd mode corresponds to '3'
-
-        data_mode1 = self.experiment.simulate(self.PARAMETERS_SCAN, mode='1')
-        data_mode3 = self.experiment.simulate(self.PARAMETERS_SCAN, mode='3')
-
-        # get the Confinement factor value for mode 1 and the guided status of mode 1 nad 2
-        confinement_factor = data_mode1[4]
-        is_leaky_mode1 = data_mode1[5]
-        is_leaky_mode2 = data_mode3[5]
-
-        # Penalization
-        if is_leaky_mode1 == 1 or is_leaky_mode2 == 2:
-            confinement_factor = self.MAX_DISPERSION_PENALIZATION
-
-        return confinement_factor
 
     def objective_function_slope(self, parameters):
         """
@@ -277,7 +233,7 @@ class CoreDEAPAlgorithm:
                                           materials, alphas, n_steps)
 
         # Define wavelength range and the sampling interval (lam_e-lam_s)/number_steps
-        number_steps = 7
+        number_steps = 4
         lam_s = 1.53
         lam_e = 1.56
         steps = np.linspace(lam_s, lam_e, number_steps)
@@ -304,8 +260,8 @@ class CoreDEAPAlgorithm:
         output = np.abs(slope_ave)
 
         # bound the objetive function
-        if output > 0.5 or output == 0:
-            output = 60
+        #if output > 2 or output == 0:
+        #output = 60
 
         return output
 
@@ -372,8 +328,8 @@ class CoreDEAPAlgorithm:
         output = np.abs(np.average(diff_err_fab))
 
         # bound the objetive function
-        if output > 0.5 or output == 0:
-            output = 60
+        #if output > 5 or output == 0:
+        #output = 60
 
         return output
 
@@ -405,10 +361,41 @@ class CoreDEAPAlgorithm:
 
     # Function to initialize individuals
     def initIndividual(self, icls, content, ccls, constraints):
-        # create n individuals with ramdom values into the constraint limits
+        """Initialize an individual with random values within constraints, ensuring
+            dop_a3 ∈ [0, dop_a1].
+
+            :param icls: Class used to instantiate the individual
+            :param content: Container for individual attributes
+            :param ccls: Class used for crossover/mutation compatibility (unused)
+            :param constraints: List of (min, max) tuples defining value ranges for parameters.
+                                Format: [a1, a2, a3, dop_a1, dop_a2, dop_a3]
+            :returns: Initialized individual with parameters within constraints
+
+            Special handling:
+            - For dop_a3 (6th parameter): Overrides its constraints to use [0, current dop_a1]
+            - Fixed parameters (where min==max) will use the exact specified value
+            - Uses :func:`~random.uniform` for value generation
+
+            Example constraints structure:
+            constraints = [
+                (1.5, 5),    # a1
+                (1.5, 5),    # a2
+                (1.5, 5),    # a3
+                (0.01, 0.15),# dop_a1
+                (0, 0),      # dop_a2
+                (0.001, 0.1) # dop_a3 (constraint ignored)
+            ]
+            """
+
         part = icls(content)
         for i, (min_value, max_value) in enumerate(constraints):
-            part[i] = random.uniform(min_value, max_value)
+            if i == 5:  # dop_a3 is the 6th parameter (index 5)
+                # Ensure dop_a3 ∈ [0, current 95% of dop_a1 value]
+                part[i] = random.uniform(0, part[3]- 0.05 * part[3])
+            else:
+                # Use original constraints for other parameters
+                part[i] = random.uniform(min_value, max_value)
+            part[i] = round(part[i], 3)
         return part
 
     def custom_mutGaussian_constraints(self, individual, mu, sigma, indpb, constraints):
@@ -427,6 +414,7 @@ class CoreDEAPAlgorithm:
         This function uses the :func:`~random.random` and :func:`~random.gauss`
         functions from the Python base :mod:`random` module.
         """
+        #print(f'sigma: {sigma}')
         size = len(individual)
         if not isinstance(mu, Sequence):
             mu = repeat(mu, size)
@@ -437,15 +425,24 @@ class CoreDEAPAlgorithm:
         elif len(sigma) < size:
             raise IndexError("sigma must be at least the size of individual: %d < %d" % (len(sigma), size))
 
-        for i, m, s, (min_value, max_value) in zip(range(size), mu, sigma, constraints):
+        """Applies Gaussian mutation while enforcing dop_a3 ∈ [0, dop_a1]."""
+        for i, m, s, (orig_min, orig_max) in zip(range(size), mu, sigma, constraints):
+            # Override constraints for dop_a3 (index 5)
+            if i == 5:
+                current_min = 0  # Force minimum 0 for dop_a3
+                current_max = individual[3] - 0.05 * individual[3]  # Dynamic max from 95% of dop_a1 (index 3)
+            else:
+                current_min, current_max = orig_min, orig_max
             if random.random() < indpb:
                 mutated_value = individual[i] + random.gauss(m, s)
-                individual[i] = max(min(mutated_value, max_value), min_value)
+                individual[i] = max(min(mutated_value, current_max), current_min)
             else:
-                individual[i] = max(min(individual[i], max_value), min_value)
+                individual[i] = max(min(individual[i], current_max), current_min)
+            individual[i] = round(individual[i], 3)
         return individual
 
-    def algorithm_execution(self, n=20, mu=10, lambda_=15, ngen=10, initial_values=0, constraints=0):
+    def algorithm_execution(self, n=20, mu=10, lambda_=15, ngen=10, initial_values=0, mean_d=0, sigma=0.9, indpb=0.5,
+                            constraints=0):
 
         # CREATE THE HELP TO THE FUNCTION
 
@@ -467,7 +464,7 @@ class CoreDEAPAlgorithm:
             toolbox.register("evaluate", self.evaluate)
             toolbox.decorate("evaluate", tools.DeltaPenalty(self.feasible, (30, 3, 3), self.distance))
             toolbox.register("mate", tools.cxBlend, alpha=0.5)
-            toolbox.register("mutate", self.custom_mutGaussian_constraints, mu=0, sigma=0.8, indpb=0.5,
+            toolbox.register("mutate", self.custom_mutGaussian_constraints, mu=mean_d, sigma=sigma, indpb=indpb,
                              constraints=constraints)
             toolbox.register("select", tools.selNSGA2)
 

@@ -56,6 +56,14 @@ class FiberParameters:
                 alphas = [0, 0, 0, 0]
                 n_steps = 2
 
+            case "W shape F-SiO2_2 with ring":
+                sizes = [4, 3, 5, 50]
+                dop_perct = [0.1, 0, 0.05, 0]
+                profile_type = ['Constant', 'Constant', 'Constant', 'Constant']
+                materials = ['GeO2-SiO2', 'F-SiO2_2', 'GeO2-SiO2', 'SiO2']
+                alphas = [0, 0, 0, 0]
+                n_steps = 2
+
             case "three layers all GeO2 dp":
                 sizes = [4, 3, 5, 30]
                 dop_perct = [0.1, 0.04, 0.02, 0]
@@ -70,23 +78,31 @@ class FiberParameters:
                 profile_type = ['Linear', 'Constant', 'Constant', 'Constant']
                 materials = ['GeO2-SiO2', 'SiO2', 'SiO2', 'SiO2']
                 alphas = [1, 0, 0, 0]
-                n_steps = 81
+                n_steps = 51
 
             case "triangular with trench F-SiO2_1":
                 sizes = [4, 3, 5, 30]
                 dop_perct = [0.1, 0, 0, 0]
                 profile_type = ['Linear', 'Constant', 'Constant', 'Constant']
-                materials = ['GeO2-SiO2', 'SiO2_2', 'F-SiO2_2', 'SiO2']
+                materials = ['GeO2-SiO2', 'SiO2', 'F-SiO2_1', 'SiO2']
                 alphas = [1, 0, 0, 0]
-                n_steps = 20
+                n_steps = 51
 
             case "triangular with trench F-SiO2_2":
                 sizes = [4, 3, 5, 30]
                 dop_perct = [0.1, 0, 0, 0]
                 profile_type = ['Linear', 'Constant', 'Constant', 'Constant']
-                materials = ['GeO2-SiO2', 'SiO2_2', 'F-SiO2_2', 'SiO2']
+                materials = ['GeO2-SiO2', 'SiO2', 'F-SiO2_2', 'SiO2']
                 alphas = [1, 0, 0, 0]
-                n_steps = 20
+                n_steps = 51
+
+            case "triangular trench F-SiO2_2":
+                sizes = [2, 2, 5, 30]
+                dop_perct = [0.1, 0, 0, 0]
+                profile_type = ['Linear', 'Constant', 'Constant', 'Constant']
+                materials = ['GeO2-SiO2', 'F-SiO2_2', 'SiO2', 'SiO2']
+                alphas = [1, 0, 0, 0]
+                n_steps = 21
 
             case "triangular with ring":
                 sizes = [4, 3, 5, 30]
@@ -94,7 +110,23 @@ class FiberParameters:
                 profile_type = ['Linear', 'Constant', 'Constant', 'Constant']
                 materials = ['GeO2-SiO2', 'SiO2', 'GeO2-SiO2', 'SiO2']
                 alphas = [1, 0, 0, 0]
-                n_steps = 20
+                n_steps = 51
+
+            case "triangular with trench F-SiO2_1 and ring":
+                sizes = [2, 2, 2, 30]
+                dop_perct = [0.05, 0, 0.02, 0]
+                profile_type = ['Linear', 'Constant', 'Constant', 'Constant']
+                materials = ['GeO2-SiO2', 'F-SiO2_1', 'GeO2-SiO2', 'SiO2']
+                alphas = [1, 0, 0, 0]
+                n_steps = 21
+
+            case "triangular with trench F-SiO2_2 and ring":
+                sizes = [2, 2, 2, 30]
+                dop_perct = [0.1, 0, 0.05, 0]
+                profile_type = ['Linear', 'Constant', 'Constant', 'Constant']
+                materials = ['GeO2-SiO2', 'F-SiO2_2', 'GeO2-SiO2', 'SiO2']
+                alphas = [1, 0, 0, 0]
+                n_steps = 51
 
             case _:
                 raise ValueError(f"Unsupported core type: {core_type}")

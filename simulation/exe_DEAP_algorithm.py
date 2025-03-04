@@ -14,15 +14,18 @@ from pdPythonLib import *
 from datetime import datetime
 
 start_time = time.time()
-
 matplotlib.use('TkAgg')
+
 # Get the current date and time
 current_time = datetime.now()
 
 # Convert the date and time to a string
 time_string = current_time.strftime("%Y-%m-%d_%H-%M-%S")
 
-results_file = 'test' + time_string + '.csv'  # MODIFY
+# build profile with index-profile:
+type_index_profile = 'W shape F-SiO2_2 with ring'
+results_file = type_index_profile + time_string + '.csv'
+
 # Open the CSV file in written mode
 f = open(results_file, 'w')
 
@@ -30,20 +33,19 @@ f = open(results_file, 'w')
 fimmap = pdApp()
 fimmap.StartApp('C:\\Program Files\\PhotonD\\Fimmwave\\bin64\\fimmwave.exe', 5101)
 
-# MODIFY DEPENDING ON PLACE OF WORKING
-# from work
-test_dir = 'D:\\OneDrive UPV\\OneDrive - UPV\PhD-m\\2023-2024\\FiberDesin_PhotonD\\FOdesign_optimization'
-# from personal computer
-# test_dir = 'C:\\Users\\Mario\\OneDrive - UPV\PhD-m\\2023-2024\\FiberDesin_PhotonD\\FOdesign_optimization'
+# Get the directory where the script is located
+script_dir = os.path.dirname(os.path.abspath(__file__))
+
+# Get the root directory by removing the last folder
+work_dir = os.path.dirname(script_dir)
 
 fiber_profile = ProfileIndexBuilder(fimmap)
-fiber_profile.create_fimm_project('test', test_dir)
+fiber_profile.create_fimm_project('test', work_dir)
 fiber_profile.add_moduleFWG('Module 1')
-fiber_profile.set_material_db(test_dir, '\\refbase_2.mat')
+fiber_profile.set_material_db(work_dir, '\\fimmwave\\refbase_2.mat')
+
 dev = "app.subnodes[1].subnodes[1]"
 
-# build profile with index-profile:
-type_index_profile = 'triangular'
 # Initial parameters
 core_type = FiberParameters()
 
@@ -59,27 +61,39 @@ fiber_profile.delete_layers()
 fiber_profile.builder_profile(dev, sizes, dop_perct, profile_type, materials, alphas, n_steps)
 
 # Define the constraints for each parameter
-a1 = [(3, 5)]
-a2 = [(2, 5)]
-a3 = [(2, 5)]
-a4 = [(30, 30)]
+a1 = [(1.5, 5)]
+a2 = [(1.5, 5)]
+a3 = [(1.5, 5)]
+a4 = [(50, 50)]
 
-dop_a1 = [(0.01, 0.15)]
+dop_a1 = [(0.005, 0.1)]
 dop_a2 = [(0, 0)]
-dop_a3 = [(0.01, 0.05)]
+dop_a3 = [(0, 0.1)]  # Original constraint (will be overridden)
 dop_a4 = [(0, 0)]
 
-alpha_a1 = [(1, 1)]
+alpha_a1 = [(0, 0)]
 alpha_a2 = [(0, 0)]
 alpha_a3 = [(0, 0)]
 alpha_a4 = [(0, 0)]
 
 constraints = a1 + a2 + a3 + dop_a1 + dop_a2 + dop_a3
-# Set initial parameter values with random values within constraints
-initial_values = [
-    random.uniform(min_value, max_value) for min_value, max_value in constraints
-]
-# Configure the progress bar, it depends on the:
+
+# Generate initial values with dop_a3 ∈ [0, dop_a1]
+initial_values = []
+for i, (orig_min, orig_max) in enumerate(constraints):
+    if i == 5:  # dop_a3 is the 6th parameter (index 5)
+        # Get already-generated dop_a1 value (index 3)
+        current_max = initial_values[3]
+        val = round(random.uniform(0, current_max), 3)  # Force min=0
+    elif orig_min == orig_max:  # Fixed parameters (a4, zeros, etc.)
+        val = orig_min
+    else:
+        val = round(random.uniform(orig_min, orig_max), 3)
+    initial_values.append(val)
+
+print(f'The initial values are {initial_values}')
+
+# Configure the progress bar, it depends on:
 
 # initial population(n),
 n = 10
@@ -88,15 +102,43 @@ mu = 10
 # offspring from the population (lambda_) and
 lambda_ = 10
 # number of generations (ngen)
-ngen = 5
+ngen = 50
+
+mean_d = 0
+
+# Define percentage of range to use as sigma (e.g., 10%)
+# Small (s=0.01)	Tiny changes, slow but precise optimization.
+# Medium (s=0.1)	Balanced exploration and refinement.
+# Large (s=1.0)	Big jumps, high exploration but risk of instability.
+sigma_fraction = 0.1
+# Compute sigma values and round to 4 decimal places
+sigma = [
+    round(sigma_fraction * (max_val - min_val), 4) if max_val > min_val else 0
+    for min_val, max_val in constraints
+]
+
+''' 
+BIAS MUTTATION->NOT RECOMENDED
+mean_fraction = 0.05    # e.g., 5% of the range for mu
+# Compute mu values and round to 4 decimal places
+mean_d = [
+    round(mean_fraction * (max_val - min_val), 4) if max_val > min_val else 0
+    for min_val, max_val in constraints
+]
+'''
+# UNBIAS MUTTATION->RECOMENDED
+mean_d = 0
+
+indpb = 0.5
 
 # simulation
 experiment = SimulationRun(fimmap)
-experiment.solver_config('FDM Fiber Solver')
+experiment.solver_config('GFS Fiber Solver')
 try:
     # execute the DEAP algorithm
     optimization = core_DEAP_algorithm.CoreDEAPAlgorithm(fimmap, fiber_profile, experiment, type_index_profile)
-    optm_population = optimization.algorithm_execution(n, mu, lambda_, ngen, initial_values, constraints)
+    optm_population = optimization.algorithm_execution(n, mu, lambda_, ngen, initial_values, mean_d, sigma, indpb,
+                                                       constraints)
 
 except Exception as e:
     # Handle the exception
@@ -130,14 +172,14 @@ finally:
     f.close()
 
     # Find the solution with the minimum obj1_val and obj2_val above X
-    min_obj1_val = float('inf')  # Initialize to positive infinity
     best_solution = None
     # minimum
-    thr = 0.07
+    thr_D = 0
+    thr_Slope = 0.5
     thr_dD_fab = 0.4
     for ind in optm_population:
         obj1_val, obj2_val, obj3_val = ind.fitness.values[0], ind.fitness.values[1], ind.fitness.values[2]
-        if obj1_val < min_obj1_val and obj2_val < thr and obj3_val < thr_dD_fab:
+        if obj1_val < float('inf') and obj2_val < float('inf') and obj3_val < float('inf'):
             min_obj1_val = obj1_val
             best_solution = ind
 
@@ -145,7 +187,7 @@ finally:
         print("Best solution with the minimum dispersion and slope bellow 0.08:")
         print("a1:", best_solution[0])
         print("a2:", best_solution[1])
-        print("a2:", best_solution[2])
+        print("a3:", best_solution[2])
         print("a1_dopa:", best_solution[3])
         print("a2_dopa:", best_solution[4])
         print("a3_dopa:", best_solution[5])
